@@ -1,0 +1,620 @@
+{
+  "categories": [
+    {
+      "id": "agriculture",
+      "label": "Cultivos",
+      "sidebarLabel": "Cultivos",
+      "icon": "agriculture",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/agriculture.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "treemap",
+        "ranking",
+        "table"
+      ],
+      "axisModes": [
+        "absolute",
+        "index"
+      ],
+      "units": [
+        "toneladas",
+        "hectáreas",
+        "GJ",
+        "t/ha"
+      ],
+      "defaultUnit": "toneladas",
+      "unitMap": {
+        "toneladas": {
+          "dataField": "production",
+          "label": "Producción (t)"
+        },
+        "hectáreas": {
+          "dataField": "area",
+          "label": "Superficie (ha)"
+        },
+        "GJ": {
+          "dataField": "value_GJ",
+          "label": "Producción (GJ)"
+        },
+        "t/ha": {
+          "dataField": "yield",
+          "label": "Rendimiento (t/ha)"
+        }
+      },
+      "unitToggle": true,
+      "unitOptions": [
+        {
+          "id": "toneladas",
+          "label": "Toneladas",
+          "suffix": ""
+        },
+        {
+          "id": "GJ",
+          "label": "Energía (GJ)",
+          "suffix": "_energy"
+        }
+      ],
+      "indicatorGroups": [
+        {
+          "id": "production",
+          "label": "Producción",
+          "indicators": [
+            {
+              "id": "production",
+              "label": "Producción",
+              "unit": "toneladas",
+              "dataField": "production",
+              "dataFieldGJ": "value_GJ",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "surface",
+          "label": "Superficie",
+          "indicators": [
+            {
+              "id": "area",
+              "label": "Superficie",
+              "unit": "hectáreas",
+              "dataField": "area",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "yields",
+          "label": "Rendimientos",
+          "indicators": [
+            {
+              "id": "yield",
+              "label": "Rendimiento",
+              "unit": "t/ha",
+              "dataField": "yield",
+              "dataFieldGJ": "yield_GJ",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trade",
+      "label": "Comercio",
+      "sidebarLabel": "Comercio",
+      "icon": "trade",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/trade.json",
+        "bilateral": "data/bilateral.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "treemap",
+        "ranking",
+        "table"
+      ],
+      "units": [
+        "toneladas",
+        "GJ"
+      ],
+      "defaultUnit": "toneladas",
+      "unitMap": {
+        "toneladas": {
+          "dataField": "exports",
+          "label": "Exportaciones (t)"
+        },
+        "GJ": {
+          "dataField": "exports_GJ",
+          "label": "Exportaciones (GJ)"
+        }
+      },
+      "unitToggle": true,
+      "unitOptions": [
+        {
+          "id": "toneladas",
+          "label": "Toneladas",
+          "suffix": ""
+        },
+        {
+          "id": "GJ",
+          "label": "Energía (GJ)",
+          "suffix": "_GJ"
+        }
+      ],
+      "indicatorGroups": [
+        {
+          "id": "trade_direct",
+          "label": "Comercio directo",
+          "indicators": [
+            {
+              "id": "exports",
+              "label": "Exportaciones",
+              "unit": "toneladas",
+              "dataField": "exports",
+              "dataFieldGJ": "exports_GJ",
+              "enabled": true
+            },
+            {
+              "id": "imports",
+              "label": "Importaciones",
+              "unit": "toneladas",
+              "dataField": "imports",
+              "dataFieldGJ": "imports_GJ",
+              "enabled": true
+            },
+            {
+              "id": "balance",
+              "label": "Balanza neta",
+              "unit": "toneladas",
+              "dataField": "balance",
+              "dataFieldGJ": "balance_GJ",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "bilateral",
+          "label": "Comercio bilateral",
+          "indicators": [
+            {
+              "id": "bilateral_exports",
+              "label": "Exportaciones",
+              "unit": "toneladas",
+              "dataField": "bilateral_exports",
+              "enabled": true
+            },
+            {
+              "id": "bilateral_imports",
+              "label": "Importaciones",
+              "unit": "toneladas",
+              "dataField": "bilateral_imports",
+              "enabled": true
+            },
+            {
+              "id": "bilateral_balance",
+              "label": "Balanza neta",
+              "unit": "toneladas",
+              "dataField": "bilateral_balance",
+              "enabled": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "footprints",
+      "label": "Huellas",
+      "sidebarLabel": "Huellas",
+      "icon": "footprints",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/footprints.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "ranking",
+        "table"
+      ],
+      "axisModes": [
+        "absolute",
+        "index"
+      ],
+      "units": [
+        "hect?reas",
+        "h/a?o"
+      ],
+      "defaultUnit": "hect?reas",
+      "indicatorGroups": [
+        {
+          "id": "land",
+          "label": "Tierra",
+          "indicators": [
+            {
+              "id": "land_footprint",
+              "label": "Huella",
+              "unit": "hect?reas",
+              "dataField": "land_footprint",
+              "enabled": true
+            },
+            {
+              "id": "land_production",
+              "label": "Producci?n",
+              "unit": "hect?reas",
+              "dataField": "land_production",
+              "enabled": true
+            },
+            {
+              "id": "land_imports",
+              "label": "Importaciones",
+              "unit": "hect?reas",
+              "dataField": "land_imports",
+              "enabled": true
+            },
+            {
+              "id": "land_exports",
+              "label": "Exportaciones",
+              "unit": "hect?reas",
+              "dataField": "land_exports",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "labor",
+          "label": "Trabajo",
+          "indicators": [
+            {
+              "id": "labor_footprint",
+              "label": "Huella",
+              "unit": "h/a?o",
+              "dataField": "labor_footprint",
+              "enabled": true
+            },
+            {
+              "id": "labor_production",
+              "label": "Producci?n",
+              "unit": "h/a?o",
+              "dataField": "labor_production",
+              "enabled": true
+            },
+            {
+              "id": "labor_imports",
+              "label": "Importaciones",
+              "unit": "h/a?o",
+              "dataField": "labor_imports",
+              "enabled": true
+            },
+            {
+              "id": "labor_exports",
+              "label": "Exportaciones",
+              "unit": "h/a?o",
+              "dataField": "labor_exports",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "landuse",
+      "label": "Uso del suelo",
+      "sidebarLabel": "Uso del suelo",
+      "icon": "landuse",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/landuse.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "ranking",
+        "table"
+      ],
+      "units": [
+        "1000 ha"
+      ],
+      "defaultUnit": "1000 ha",
+      "unitMap": {
+        "1000 ha": {
+          "dataField": "agricultural_land",
+          "label": "Superficie (1000 ha)"
+        }
+      },
+      "indicatorGroups": [
+        {
+          "id": "surface",
+          "label": "Superficie",
+          "indicators": [
+            {
+              "id": "land_area",
+              "label": "Superficie",
+              "unit": "1000 ha",
+              "dataField": "agricultural_land",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "livestock",
+      "label": "Ganadería",
+      "sidebarLabel": "Ganadería",
+      "icon": "livestock",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/livestock.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "ranking",
+        "table"
+      ],
+      "units": [
+        "cabezas",
+        "UG",
+        "GJ"
+      ],
+      "defaultUnit": "cabezas",
+      "unitMap": {
+        "cabezas": {
+          "dataField": "heads",
+          "label": "Cabezas"
+        },
+        "UG": {
+          "dataField": "lu",
+          "label": "Unidades ganaderas (LU)"
+        },
+        "GJ": {
+          "dataField": "grass_intake",
+          "label": "Consumo de forraje (GJ)"
+        }
+      },
+      "indicatorGroups": [
+        {
+          "id": "stock",
+          "label": "Stock",
+          "indicators": [
+            {
+              "id": "heads",
+              "label": "Cabezas",
+              "unit": "cabezas",
+              "dataField": "heads",
+              "enabled": true
+            },
+            {
+              "id": "lu",
+              "label": "Uds. ganaderas",
+              "unit": "UG",
+              "dataField": "lu",
+              "enabled": true
+            },
+            {
+              "id": "grass_intake",
+              "label": "Forraje",
+              "unit": "GJ",
+              "dataField": "grass_intake",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "labor",
+      "label": "Trabajo",
+      "sidebarLabel": "Trabajo",
+      "icon": "labor",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/employment.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "treemap",
+        "ranking",
+        "table"
+      ],
+      "units": [
+        "personas",
+        "M horas/año"
+      ],
+      "defaultUnit": "personas",
+      "unitMap": {
+        "personas": {
+          "dataField": "workers",
+          "label": "Trabajadores"
+        },
+        "M horas/año": {
+          "dataField": "hours",
+          "label": "Horas"
+        }
+      },
+      "indicatorGroups": [
+        {
+          "id": "labor",
+          "label": "Trabajo agrario",
+          "indicators": [
+            {
+              "id": "workers",
+              "label": "Trabajadores",
+              "unit": "personas",
+              "dataField": "workers",
+              "enabled": true
+            },
+            {
+              "id": "hours",
+              "label": "Horas",
+              "unit": "M horas/año",
+              "dataField": "hours",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "socioeconomic",
+      "label": "Desigualdad",
+      "sidebarLabel": "Desigualdad",
+      "icon": "socioeconomic",
+      "enabled": true,
+      "dataFiles": {
+        "annual": "data/socioeconomic.json"
+      },
+      "views": [
+        "map",
+        "trend",
+        "ranking",
+        "table"
+      ],
+      "units": [
+        "índice",
+        "%"
+      ],
+      "defaultUnit": "índice",
+      "unitMap": {
+        "índice": {
+          "dataField": "land_gini",
+          "label": "Gini de la tierra"
+        },
+        "%": {
+          "dataField": "reform_total_pc",
+          "label": "Reforma agraria"
+        }
+      },
+      "indicatorGroups": [
+        {
+          "id": "inequality",
+          "label": "Desigualdad",
+          "indicators": [
+            {
+              "id": "land_gini",
+              "label": "Gini tierra",
+              "unit": "índice",
+              "dataField": "land_gini",
+              "enabled": true
+            },
+            {
+              "id": "gini_disp",
+              "label": "Gini ingreso disp.",
+              "unit": "índice",
+              "dataField": "gini_disp",
+              "enabled": false
+            },
+            {
+              "id": "gini_mkt",
+              "label": "Gini ingreso mercado",
+              "unit": "índice",
+              "dataField": "gini_mkt",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "id": "land_reform",
+          "label": "Reforma agraria",
+          "indicators": [
+            {
+              "id": "reform_total_pc",
+              "label": "Reforma total",
+              "unit": "% tierra cultivable",
+              "dataField": "reform_total_pc",
+              "enabled": true
+            },
+            {
+              "id": "reform_intensity",
+              "label": "Intensidad reforma",
+              "unit": "0-2",
+              "dataField": "reform_intensity",
+              "enabled": true
+            },
+            {
+              "id": "reform_binary",
+              "label": "Legislación reforma",
+              "unit": "0/1",
+              "dataField": "reform_binary",
+              "enabled": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "id": "mexico",
+      "label": "México",
+      "countries": [
+        "MEX"
+      ]
+    },
+    {
+      "id": "central_caribbean",
+      "label": "Centroamérica y Caribe",
+      "countries": [
+        "GTM",
+        "SLV",
+        "HND",
+        "NIC",
+        "CRI",
+        "PAN",
+        "CUB",
+        "DOM",
+        "HTI",
+        "PRI"
+      ]
+    },
+    {
+      "id": "andean",
+      "label": "Andina",
+      "countries": [
+        "COL",
+        "VEN",
+        "ECU",
+        "PER",
+        "BOL"
+      ]
+    },
+    {
+      "id": "brazil",
+      "label": "Brasil",
+      "countries": [
+        "BRA"
+      ]
+    },
+    {
+      "id": "southern_cone",
+      "label": "Cono Sur",
+      "countries": [
+        "ARG",
+        "CHL",
+        "URY",
+        "PRY"
+      ]
+    }
+  ],
+  "geoLevels": [
+    {
+      "id": "country",
+      "label": "Países"
+    },
+    {
+      "id": "region",
+      "label": "Regiones"
+    },
+    {
+      "id": "subnational",
+      "label": "Subnacional"
+    }
+  ]
+}

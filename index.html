@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Agrario de Am&eacute;rica Latina</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23D4A032'/%3E%3Cpath d='M12 4v16M8 12c0-2 2-4 4-4M16 12c0-2-2-4-4-4M8 8c0-2 2-4 4-4M16 8c0-2-2-4-4-4' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=20260522-mobile-ui18">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js" } }
+</script>
+</head>
+<body>
+
+<!-- Landing / Hero page -->
+<div class="landing mode-globo" id="landing">
+    <!-- Portada 1: GLOBO (default) — Three.js Earth + LATAM zoom + retro map -->
+    <canvas class="landing-globe" id="landing-globe"></canvas>
+    <canvas class="landing-particles" id="landing-particles"></canvas>
+    <div class="landing-retro-map" id="landing-retro-map"></div>
+    <div class="landing-cursor" id="landing-cursor" aria-hidden="true"></div>
+
+    <!-- Portada 2: PAISAJE — pintura agraria con humo, nubes y brillos del r&iacute;o animados.
+         All FX live inside one SVG whose viewBox matches the painting's natural pixel
+         dimensions (1774x887) and uses xMidYMid slice — same crop behaviour as the
+         image's background-size: cover, so positions stay anchored to the chimneys
+         and the river regardless of viewport aspect ratio. -->
+    <div class="landing-paisaje" aria-hidden="true">
+        <div class="landing-paisaje-img"></div>
+        <svg class="landing-paisaje-fx" viewBox="0 0 1774 887" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+                <radialGradient id="pf-white" cx="40%" cy="40%" r="55%">
+                    <stop offset="0%"  stop-color="#fbf5e6" stop-opacity="0.88"/>
+                    <stop offset="45%" stop-color="#d8cdb6" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#8c8276" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="pf-grey" cx="40%" cy="40%" r="55%">
+                    <stop offset="0%"  stop-color="#e8dfce" stop-opacity="0.78"/>
+                    <stop offset="45%" stop-color="#a89e90" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#5e5648" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="pf-dark" cx="40%" cy="40%" r="55%">
+                    <stop offset="0%"  stop-color="#574b40" stop-opacity="0.85"/>
+                    <stop offset="45%" stop-color="#322a23" stop-opacity="0.55"/>
+                    <stop offset="100%" stop-color="#18120e" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="pf-spark" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%"  stop-color="#fff6d8" stop-opacity="1"/>
+                    <stop offset="60%" stop-color="#ffdfa0" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#ffba60" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="pf-blur" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="9"/>
+                </filter>
+                <filter id="pf-blur-tight" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4"/>
+                </filter>
+            </defs>
+
+            <!-- ============ SMOKE COLUMNS ============
+                 Each <g> is anchored at a chimney/locomotive on the painting (image-pixel
+                 coords). Inside, 3 circles cycle through animateTransform/animate so a
+                 continuous column of puffs rises. Three smoke palettes — pf-white for the
+                 sugar mill, pf-grey for the factory, pf-dark for the locomotive. -->
+
+            <!-- LEFT — sugar mill / ingenio at top-left of painting -->
+            <g class="smoke-src" transform="translate(115 200)">
+                <circle r="32" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="34" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" begin="1.7s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" begin="1.7s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="30" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" begin="3.4s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" begin="3.4s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+            <g class="smoke-src" transform="translate(170 235)">
+                <circle r="22" fill="url(#pf-grey)" filter="url(#pf-blur-tight)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.7;0.4;0" keyTimes="0;0.12;0.6;1" dur="4.8s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,8; 8,-60; 18,-150; 35,-230" keyTimes="0;0.3;0.7;1" dur="4.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="22" fill="url(#pf-grey)" filter="url(#pf-blur-tight)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.7;0.4;0" keyTimes="0;0.12;0.6;1" dur="4.8s" begin="2.4s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,8; 8,-60; 18,-150; 35,-230" keyTimes="0;0.3;0.7;1" dur="4.8s" begin="2.4s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+
+            <!-- RIGHT — factory cluster (4 chimneys) -->
+            <g class="smoke-src" transform="translate(1320 200)">
+                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" begin="1.9s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" begin="1.9s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" begin="3.7s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" begin="3.7s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+            <g class="smoke-src" transform="translate(1390 185)">
+                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" begin="2.0s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" begin="2.0s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" begin="4.0s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" begin="4.0s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+            <g class="smoke-src" transform="translate(1460 170)">
+                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" begin="1.8s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" begin="1.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" begin="3.6s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" begin="3.6s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+            <g class="smoke-src" transform="translate(1530 195)">
+                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" begin="1.7s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" begin="1.7s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" begin="3.3s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" begin="3.3s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+
+            <!-- TRAIN — locomotive on the lower-right tracks, dark coal smoke drifting strongly right -->
+            <g class="smoke-src" transform="translate(1620 360)">
+                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" begin="1.4s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" begin="1.4s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
+                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" begin="2.8s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" begin="2.8s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+
+            <!-- ============ CLOUDS ============
+                 Two stacked soft-ellipse bands. The whole <g> translates from 0 to -440
+                 over its duration; an extra "tile" of clouds at +1774 keeps the band
+                 seamless as it scrolls. -->
+            <g class="cloud-band cloud-band-1" opacity="0.55">
+                <ellipse cx="200"  cy="65"  rx="140" ry="20" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="540"  cy="50"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="980"  cy="80"  rx="150" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="1400" cy="60"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="1974" cy="65"  rx="140" ry="20" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="2314" cy="50"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <animateTransform attributeName="transform" type="translate" from="0 0" to="-440 0" dur="55s" repeatCount="indefinite"/>
+            </g>
+            <g class="cloud-band cloud-band-2" opacity="0.4">
+                <ellipse cx="120"  cy="135" rx="100" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="460"  cy="125" rx="120" ry="16" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="860"  cy="145" rx="110" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="1240" cy="130" rx="140" ry="18" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="1700" cy="140" rx="110" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <ellipse cx="1894" cy="135" rx="100" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
+                <animateTransform attributeName="transform" type="translate" from="0 0" to="-380 0" dur="85s" repeatCount="indefinite"/>
+            </g>
+
+            <!-- ============ RIVER SPARKLES ============
+                 Tiny warm dots scattered along the river curve; each one fades in/out
+                 with a staggered cycle so the water appears to glint without a visible
+                 line. No path, no stroke — just sun reflections. -->
+            <g class="river-sparkles">
+                <circle cx="1290" cy="295" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.0s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="1200" cy="330" r="5" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.6s" begin="0.4s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="1080" cy="370" r="7" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.4s" begin="0.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="960" cy="420" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="820" cy="480" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="660" cy="540" r="7" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.4s" begin="1.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="480" cy="620" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.0s" begin="0.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="300" cy="685" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.8s" begin="1.0s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="160" cy="720" r="5" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
+                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.4s" begin="1.4s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+        </svg>
+
+        <!-- Title backdrop — strong dark veil concentrated where the ATLAS title sits,
+             so the cream typography reads clearly over the painted sky. -->
+        <div class="paisaje-veil" aria-hidden="true"></div>
+        <!-- Soft sunset glow on the right edge — pulses gently -->
+        <div class="paisaje-rays" aria-hidden="true"></div>
+    </div>
+
+    <!-- Switcher: 2 portadas — top-right corner -->
+    <nav class="landing-switcher" id="landing-switcher" aria-label="Estilo de portada">
+        <span class="ls-label">Portada</span>
+        <button data-mode="globo" class="active" type="button">Globo</button>
+        <span class="ls-sep">&middot;</span>
+        <button data-mode="paisaje" type="button">Paisaje</button>
+    </nav>
+
+    <div class="landing-content" id="landing-content">
+        <div class="landing-top">
+            <div class="landing-atlas">ATLAS</div>
+            <h1 class="landing-title">Agrario de Am&eacute;rica Latina</h1>
+            <div class="landing-rule"></div>
+            <p class="landing-subtitle">Producci&oacute;n, comercio y trabajo agrario en perspectiva hist&oacute;rica</p>
+            <div class="landing-progress" id="landing-progress">
+                <div class="landing-bar"></div>
+            </div>
+            <button class="landing-cta" id="landing-cta" style="display:none">
+                Explorar el atlas
+                <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- App -->
+<div id="app">
+    <!-- Atlas-like dark sidebar for views -->
+    <nav class="sidebar">
+        <div class="sb-categories" id="sidebar"></div>
+        <button class="sb-info-btn about-toggle-btn" id="btn-info" data-action="about" title="Informaci&oacute;n de la web" aria-label="Informaci&oacute;n de la web">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span class="sb-info-label">Info web</span>
+        </button>
+    </nav>
+
+    <!-- Hidden indicator panel (populated by JS, used as data source for dropdown) -->
+    <aside class="ind-panel hidden" id="ind-panel"></aside>
+
+    <!-- Main content area -->
+    <div class="main">
+        <!-- Query bar: reads like a sentence -->
+        <div class="query-bar">
+            <div class="query-segment query-cat-segment">
+                <button class="query-btn query-cat-btn" id="query-cat" title="Categor&iacute;a">
+                    <svg class="query-cat-icon" viewBox="0 0 24 24" id="query-cat-icon"></svg>
+                    <span id="category-label">Cultivos</span>
+                    <svg class="query-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="query-dropdown" id="query-cat-dropdown"></div>
+            </div>
+            <span class="query-sep">/</span>
+            <span class="query-breadcrumb" id="indicator-label">Producci&oacute;n</span>
+            <!-- Selection chips (inline inside query bar) -->
+            <div class="selection-bar" id="selection-bar"></div>
+            <div class="query-spacer"></div>
+            <button class="query-icon-btn indicator-info-btn" id="btn-indicator-info" type="button" aria-label="Informaci&oacute;n del indicador" data-info="">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M12 10v7M12 7h.01" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="query-icon-btn panel-toggle-btn" id="btn-toggle-panel" type="button" title="Opciones" aria-label="Abrir opciones">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="panel-toggle-gear" d="M12 8.35a3.65 3.65 0 1 0 0 7.3 3.65 3.65 0 0 0 0-7.3z" fill="none" stroke="currentColor" stroke-width="1.65"/>
+                    <path class="panel-toggle-gear" d="M19.45 13.3a7.8 7.8 0 0 0 0-2.6l2.05-1.45-2-3.46-2.45 1a7.2 7.2 0 0 0-2.25-1.3L14.5 3h-4l-.3 2.49a7.2 7.2 0 0 0-2.25 1.3l-2.45-1-2 3.46 2.05 1.45a7.8 7.8 0 0 0 0 2.6L3.5 14.75l2 3.46 2.45-1a7.2 7.2 0 0 0 2.25 1.3l.3 2.49h4l.3-2.49a7.2 7.2 0 0 0 2.25-1.3l2.45 1 2-3.46-2.05-1.45z" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Visualization panels -->
+        <div class="viz-container">
+
+
+            <div class="viz-panel active" id="panel-map">
+                <div class="map-container" id="map-container" style="flex:1; border-right:1px solid var(--c-border); position:relative;">
+                    <div class="map-year" id="map-year"></div>
+                    <svg class="map-svg" id="map-svg"></svg>
+                    <div class="map-legend" id="map-legend"></div>
+                </div>
+                <div class="map-container" id="map-container-2" style="flex:1; display:none; position:relative;">
+                    <div class="map-year" id="map-year-2"></div>
+                    <svg class="map-svg" id="map-svg-2"></svg>
+                    <button id="btn-close-compare" style="position:absolute; top:12px; right:16px; padding:4px 10px; background:var(--c-bg); border:1px solid var(--c-border); cursor:pointer; border-radius:4px; font-size:11px; z-index:10; opacity:0.7;" title="Cerrar comparación">&times;</button>
+                </div>
+            </div>
+            <div class="viz-panel" id="panel-trend">
+                <div class="chart-container" id="trend-chart-container">
+                    <svg class="chart-svg" id="trend-svg"></svg>
+                    <div class="chart-empty" id="trend-empty">Selecciona uno o m&aacute;s pa&iacute;ses para ver la evoluci&oacute;n</div>
+                </div>
+            </div>
+            <div class="viz-panel" id="panel-treemap">
+                <div class="treemap-container" id="treemap-container">
+                    <div class="treemap-header" id="treemap-header"></div>
+                    <div class="treemap-chart" id="treemap-chart"></div>
+                </div>
+            </div>
+            <div class="viz-panel" id="panel-ranking">
+                <div class="ranking-container" id="ranking-container"></div>
+            </div>
+            <div class="viz-panel" id="panel-table">
+                <div class="table-container" id="table-container"></div>
+            </div>
+            <div class="viz-panel" id="panel-bilateral">
+                <div class="bilateral-controls" id="bilateral-controls">
+                    <div class="bc-group">
+                        <label class="bc-label">EXPORTADOR</label>
+                        <select class="bc-select" id="bc-exporter"></select>
+                    </div>
+                    <button class="bc-swap" id="bc-swap" title="Intercambiar">&#8644;</button>
+                    <div class="bc-group">
+                        <label class="bc-label">DESTINO</label>
+                        <select class="bc-select" id="bc-importer" disabled title="Todos los socios comerciales">
+                            <option value="world">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bilateral-container" id="bilateral-container" style="flex:1; position:relative;">
+                    <div class="map-year" id="bilateral-year"></div>
+                    <svg class="map-svg" id="bilateral-svg"></svg>
+                    <div class="map-legend" id="bilateral-legend"></div>
+                    <div class="bilateral-info" id="bilateral-info"></div>
+                </div>
+            </div>
+            <div class="viz-panel" id="panel-country">
+                <div class="country-panel-container" id="country-panel-container"></div>
+            </div>
+            <div class="viz-panel" id="panel-about">
+                <div class="about-container" id="about-container">
+                    <div class="about-content">
+                        <h1>Atlas Agrario de Am&eacute;rica Latina</h1>
+                        <p class="about-lead">Plataforma de datos hist&oacute;ricos sobre producci&oacute;n agr&iacute;cola, comercio, ganader&iacute;a y trabajo agrario en Am&eacute;rica Latina.</p>
+                        <div class="about-nav" id="about-nav">
+                            <button class="about-nav-btn active" data-section="equipo">Equipo</button>
+                            <button class="about-nav-btn" data-section="metodologia">Metodolog&iacute;a</button>
+                            <button class="about-nav-btn" data-section="cobertura">Cobertura</button>
+                            <button class="about-nav-btn" data-section="publicaciones">Publicaciones</button>
+                        </div>
+                        <div class="about-section active" id="about-equipo">
+                            <div class="about-team-grid">
+                                <article class="about-card">
+                                    <div class="about-avatar"><img src="img/juaninfante.jpg" alt="Juan Infante-Amate"></div>
+                                    <div class="about-card-name">Juan Infante-Amate</div>
+                                    <div class="about-card-role">Universidad de Granada</div>
+                                    <div class="about-card-desc">Historia ambiental y econ&oacute;mica agraria</div>
+                                    <div class="about-card-links">
+                                        <a href="assets/cv/infante_CV_extended_ES.pdf" target="_blank" rel="noopener" title="CV" aria-label="CV"><img src="assets/img/team/cv-1.png" alt=""></a>
+                                        <a href="https://scholar.google.com/citations?user=s89YchgAAAAJ" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar"><img src="assets/img/team/google-scholar-1.png" alt=""></a>
+                                        <a href="https://www.researchgate.net/profile/Juan-Infante-Amate" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
+                                        <a href="https://www.ugr.es/en/staff/juan-infante-amate" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
+                                    </div>
+                                </article>
+                                <article class="about-card">
+                                    <div class="about-avatar"><img src="img/alexander-urrego.jpg" alt="Alexander Urrego Mesa"></div>
+                                    <div class="about-card-name">Alexander Urrego Mesa</div>
+                                    <div class="about-card-role">Universitat de Barcelona</div>
+                                    <div class="about-card-desc">Historia econ&oacute;mica y metabolismo agrario</div>
+                                    <div class="about-card-links">
+                                        <a href="https://webgrec.ub.edu/webpages/000005/cas/alex.urrego.mesa.ub.edu.html" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
+                                        <a href="https://www.scopus.com/authid/detail.uri?authorId=57205240733" target="_blank" rel="noopener" title="Scopus" aria-label="Scopus"><span class="about-link-text">Sc</span></a>
+                                        <a href="https://orcid.org/0000-0002-8256-0321" target="_blank" rel="noopener" title="ORCID" aria-label="ORCID"><span class="about-link-text">iD</span></a>
+                                    </div>
+                                </article>
+                                <article class="about-card">
+                                    <div class="about-avatar"><img src="img/eduardo.jpg" alt="Eduardo Aguilera"></div>
+                                    <div class="about-card-name">Eduardo Aguilera</div>
+                                    <div class="about-card-role">CSIC &middot; IEGD</div>
+                                    <div class="about-card-desc">Agroecolog&iacute;a y cambio clim&aacute;tico</div>
+                                    <div class="about-card-links">
+                                        <a href="https://scholar.google.es/citations?user=3c01eqQAAAAJ" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar"><img src="assets/img/team/google-scholar-1.png" alt=""></a>
+                                        <a href="https://www.researchgate.net/profile/Eduardo-Aguilera" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
+                                        <a href="https://iegd.csic.es/es/personal/eduardo-manuel-aguilera-fernandez" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
+                                    </div>
+                                </article>
+                                <article class="about-card">
+                                    <div class="about-avatar"><img src="img/marc-badia.jpg" alt="Marc Badia-Mir&oacute;"></div>
+                                    <div class="about-card-name">Marc Badia-Mir&oacute;</div>
+                                    <div class="about-card-role">Universitat de Barcelona</div>
+                                    <div class="about-card-desc">Historia econ&oacute;mica de Am&eacute;rica Latina</div>
+                                    <div class="about-card-links">
+                                        <a href="https://www.ub.edu/school-economics/researchers/badia-marc/" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
+                                        <a href="https://www.researchgate.net/profile/Marc-Badia-Miro" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
+                                        <a href="https://orcid.org/0000-0001-5326-1819" target="_blank" rel="noopener" title="ORCID" aria-label="ORCID"><span class="about-link-text">iD</span></a>
+                                        <a href="https://webofscience.com/wos/author/record/D-8431-2011" target="_blank" rel="noopener" title="Web of Science" aria-label="Web of Science"><span class="about-link-text">WoS</span></a>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                        <div class="about-section" id="about-metodologia">
+                            <div class="method-accordion" id="method-cards">
+                                <details class="method-card method-detail" open>
+                                    <summary>
+                                        <span>
+                                            <span class="method-kicker">Base principal</span>
+                                            <strong>Series agrarias nacionales</strong>
+                                        </span>
+                                    </summary>
+                                    <div class="method-detail-body">
+                                        <p>Cultivos, uso del suelo, ganader&iacute;a y comercio directo se organizan como paneles pa&iacute;s-a&ntilde;o comparables. El criterio del visor es separar observaci&oacute;n, armonizaci&oacute;n y estimaci&oacute;n: las series originales se preservan en la base de trabajo y el visor presenta las variables finales ya normalizadas.</p>
+                                        <p>El documento general del proyecto cubrir&aacute; esta base agraria completa, excepto los m&oacute;dulos de trabajo y desigualdad, que necesitan notas y citas propias.</p>
+                                    </div>
+                                </details>
+                                <details class="method-card method-detail">
+                                    <summary>
+                                        <span>
+                                            <span class="method-kicker">Comercio</span>
+                                            <strong>Comercio directo y bilateral</strong>
+                                        </span>
+                                    </summary>
+                                    <div class="method-detail-body">
+                                        <p>El comercio directo resume exportaciones, importaciones y balanza por territorio y producto. El comercio bilateral a&ntilde;ade socios comerciales y permite consultar flujos origen-destino, productos y rankings de socios cuando la matriz bilateral existe.</p>
+                                        <p>Cuando el visor muestra agregados regionales, estos proceden de la suma o agregaci&oacute;n regional definida en la base procesada. Las futuras notas de descarga deber&iacute;an distinguir dato observado, agregado regional y estimaci&oacute;n.</p>
+                                    </div>
+                                </details>
+                                <details class="method-card method-detail">
+                                    <summary>
+                                        <span>
+                                            <span class="method-kicker">Territorio</span>
+                                            <strong>Cobertura subnacional</strong>
+                                        </span>
+                                    </summary>
+                                    <div class="method-detail-body">
+                                        <p>El nivel subnacional se activa s&oacute;lo cuando existen geometr&iacute;as y datos admin1. Si no hay dato subnacional real para un indicador, el visor debe evitar mezclarlo con detalle provincial y mostrar con claridad el dato nacional o bloquear el nivel, seg&uacute;n el caso.</p>
+                                        <p>La cobertura var&iacute;a por pa&iacute;s, a&ntilde;o e indicador. Por eso se a&ntilde;ade una pesta&ntilde;a espec&iacute;fica de cobertura calculada desde los JSON actuales del visor.</p>
+                                    </div>
+                                </details>
+                                <details class="method-card method-detail">
+                                    <summary>
+                                        <span>
+                                            <span class="method-kicker">M&oacute;dulos externos</span>
+                                            <strong>Trabajo y desigualdad</strong>
+                                        </span>
+                                    </summary>
+                                    <div class="method-detail-body">
+                                        <p>Trabajo y desigualdad se tratar&aacute;n como secciones metodol&oacute;gicas separadas porque proceden de fuentes externas y criterios espec&iacute;ficos. En desigualdad, las observaciones originales de Gini y reforma agraria deben citarse por autor y fuente; las interpolaciones o agregaciones regionales deben marcarse como elaboraci&oacute;n propia.</p>
+                                        <p><strong>Suggested citation:</strong> Infante-Amate and Escalante (forthcoming). <em>Agricultural Labour Database for Latin America</em>.</p>
+                                    </div>
+                                </details>
+                                <div class="method-footer-link">
+                                    <a class="method-link" href="docs/metodologia.md" target="_blank" rel="noopener">Abrir borrador metodol&oacute;gico general</a>
+                                    <span class="method-link muted">Zenodo record and data paper: forthcoming DOI</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="about-section" id="about-cobertura">
+                            <div class="coverage-summary" id="coverage-summary">Pulsa esta pesta&ntilde;a para calcular la cobertura desde los datos cargados por el visor.</div>
+                            <div class="coverage-grid" id="coverage-grid"></div>
+                        </div>
+                        <div class="about-section" id="about-publicaciones">
+                            <p class="about-placeholder">Listado de publicaciones pr&oacute;ximamente.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+            <button class="tl-play" id="tl-play">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="tl-speed" id="tl-speed">4x</button>
+            <input class="tl-year-input" id="tl-year-start" type="number" title="A&ntilde;o inicio">
+            <div class="tl-track" id="tl-track">
+                <div class="tl-rail"></div>
+                <div class="tl-range-fill" id="tl-range-fill"></div>
+                <div class="tl-handle" id="tl-handle-from">
+                    <div class="tl-handle-label" id="tl-label-from"></div>
+                </div>
+                <div class="tl-handle" id="tl-handle-to">
+                    <div class="tl-handle-label" id="tl-label-to"></div>
+                </div>
+            </div>
+            <input class="tl-year-input" id="tl-year-end" type="number" title="A&ntilde;o fin">
+            <div class="tl-year" id="tl-year">2020</div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span id="footer-source">Fuente: FAO &middot; FAOSTAT &middot; IIA &middot; Estad&iacute;sticas nacionales</span>
+            <div class="footer-actions">
+                <button class="footer-btn footer-about-btn about-toggle-btn" id="btn-about-footer" data-action="about" title="Acerca de la web" aria-label="Acerca de la web">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zm.95 14.7h-1.9v-6.4h1.9v6.4zm0-8.2h-1.9V7.1h1.9V9z" fill="currentColor"/></svg>
+                    <span>Acerca</span>
+                </button>
+                <button class="footer-btn" id="btn-csv" title="Descargar datos del panel actual">Descargar datos</button>
+                <button class="footer-btn" id="btn-fs">Pantalla completa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right panel: options, products, territories -->
+    <aside class="right-panel" id="right-panel">
+      <div class="right-panel-resizer" id="right-panel-resizer" title="Cambiar ancho del panel"></div>
+      <button class="right-panel-close" id="right-panel-close" type="button" aria-label="Cerrar opciones">
+        <span>Opciones abiertas</span>
+        <strong>Cerrar</strong>
+      </button>
+      <div class="rp-section" id="rp-options">
+        <button class="rp-section-header" type="button">OPCIONES</button>
+        <div class="rp-section-body" id="rp-options-body"></div>
+      </div>
+      <div class="rp-section" id="rp-products" style="display:none">
+        <button class="rp-section-header" id="rp-products-header" type="button">PRODUCTOS</button>
+        <div class="rp-section-body rp-scrollable" id="rp-products-body">
+          <div class="rp-search"><input type="text" id="rp-product-search" placeholder="Buscar..."></div>
+          <div id="rp-product-list"></div>
+        </div>
+      </div>
+      <div class="rp-section" id="rp-partners" style="display:none">
+        <button class="rp-section-header" id="rp-partners-header" type="button">SOCIOS</button>
+        <div class="rp-section-body rp-scrollable" id="rp-partners-body">
+          <div class="rp-search"><input type="text" id="rp-partner-search" placeholder="Buscar socio..."></div>
+          <div id="rp-partner-list"></div>
+        </div>
+      </div>
+      <div class="rp-section" id="rp-territories">
+        <button class="rp-section-header" type="button">TERRITORIOS</button>
+        <div class="rp-section-body rp-scrollable" id="rp-territories-body">
+          <div id="rp-level-pills"></div>
+          <div class="rp-search"><input type="text" id="rp-territory-search" placeholder="Buscar pa&iacute;s..."></div>
+          <div id="rp-territory-list"></div>
+        </div>
+      </div>
+    </aside>
+</div>
+
+<script type="module" src="js/landing.js?v=20260522-mobile-ui18"></script>
+</body>
+</html>
+
+
+
+
