@@ -1,0 +1,52 @@
+{
+ "fuente": "C:\\Users\\jinfa\\OneDrive\\05_projects\\latam\\data\\final\\crop_panel.csv",
+ "celdas": 381672,
+ "observadas": 79606,
+ "estimadas": 301085,
+ "sin_dato": 981,
+ "pct_observado": 20.9,
+ "cultivos": 162,
+ "paises": 19,
+ "anos": [
+  1900,
+  2023
+ ],
+ "metodos_pipeline": {
+  "no_evidence_zero": 127531,
+  "faostat_zero": 125311,
+  "original": 79606,
+  "growth_population_backfill": 26361,
+  "no_historical_evidence": 16843,
+  "growth_population_bridge": 1838,
+  "growth_country_exports_backfill": 1810,
+  "linear_interp": 1221,
+  "missing": 981,
+  "growth_country_exports_bridge": 170
+ },
+ "fuentes_pipeline": {
+  "faostat_zero": 119355,
+  "iia": 79081,
+  "nan": 78324,
+  "faostat": 74559,
+  "fao_yearbook": 25645,
+  "no_historical_evidence": 3895,
+  "fao_yearbook_whep_parse": 261,
+  "inegi_ehm_2014": 252,
+  "league_of_nations": 238,
+  "mitchell_ihs_verified": 58,
+  "usda_cotton_whep_parse": 2,
+  "usda_cuba_1969": 1,
+  "national_statistics": 1
+ },
+ "mapa_metodos": {
+  "original": "observed",
+  "linear_interp": "linear_interpolation",
+  "growth_population_backfill": "growth_proxy",
+  "growth_population_bridge": "growth_proxy",
+  "growth_country_exports_backfill": "growth_proxy",
+  "growth_country_exports_bridge": "growth_proxy",
+  "faostat_zero": "structural_zero",
+  "no_evidence_zero": "structural_zero",
+  "no_historical_evidence": "structural_zero"
+ }
+}

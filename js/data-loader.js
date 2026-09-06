@@ -1,10 +1,10 @@
 /* data-loader.js - CSV-first data loader with JSON fallback */
 
-import State from './state.js?v=20260522-mobile-ui18';
-import { COUNTRIES, REGIONS } from './utils.js';
+import State from './state.js?v=20260906f';
+import { COUNTRIES, REGIONS } from './utils.js?v=20260906f';
 
 const DataLoader = (() => {
-    const DATA_VERSION = '20260522-mobile-ui18';
+    const DATA_VERSION = '20260905c';
     let _metadata = null;
     let _geo = null;
     let _topo = null;
@@ -531,9 +531,11 @@ const DataLoader = (() => {
                     _computeYieldGJ(data);
                 }
 
-                // Also load bilateral data and inject totals into trade data
-                if (categoryId === 'trade' && cat.dataFiles.bilateral) {
-                    await loadBilateral();
+                // bilateral.json is 10.4 MB and only the four bilateral_* indicators need it,
+                // so it is NOT chained to the trade category any more: it loads when one of
+                // those indicators is chosen. Whichever of the two files arrives second does
+                // the injection, so the order the user takes does not matter.
+                if (categoryId === 'trade' && _bilateralData) {
                     _injectBilateralTotals(data);
                 }
 
@@ -1634,6 +1636,9 @@ const DataLoader = (() => {
                 const url = cat?.dataFiles?.bilateral || 'data/bilateral.json';
                 _bilateralData = await fetch(_withVersion(url)).then(r => r.json());
                 console.log(`[DATA] Bilateral loaded: ${Object.keys(_bilateralData.countries).length} countries`);
+                // Trade may already be in memory (it no longer waits for this file), in which
+                // case its bilateral_* totals are still missing. Fill them in now.
+                if (_dataStore.trade) _injectBilateralTotals(_dataStore.trade);
             } catch (err) {
                 console.warn('Failed to load bilateral data:', err);
             }

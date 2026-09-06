@@ -1,9 +1,9 @@
 /* treemap-view.js - Harvard Atlas-inspired composition treemap */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { COUNTRIES, REGIONS, CATEGORY_COLORS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260522-mobile-ui18';
-import { showTooltip, hideTooltip } from '../components/tooltip.js';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { COUNTRIES, REGIONS, CATEGORY_COLORS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260906f';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
 
 let _container, _chartEl;
 let _width = 0, _height = 0;

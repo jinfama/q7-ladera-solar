@@ -1,9 +1,9 @@
 /* bilateral-view.js - World map with bilateral trade flow arcs */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { COUNTRIES, REGIONS, SEQ_COLORS, fmt } from '../utils.js?v=20260522-mobile-ui18';
-import { showTooltip, hideTooltip } from '../components/tooltip.js';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { COUNTRIES, REGIONS, SEQ_COLORS, fmt } from '../utils.js?v=20260906f';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
 
 /* -----------------------------------------------
    Module state
@@ -57,7 +57,7 @@ async function _loadWorld() {
     if (_loadPromise) return _loadPromise;
     _loadPromise = (async () => {
         try {
-            const resp = await fetch('data/world-110m.json?v=20260522-mobile-ui18');
+            const resp = await fetch('data/world-110m.json?v=20260905c');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             _worldTopo = await resp.json();
             _worldGeo = topojson.feature(_worldTopo, _worldTopo.objects.countries);

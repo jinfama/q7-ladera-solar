@@ -1,9 +1,9 @@
 /* map-view.js - Choropleth map of Latin America */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { SEQ_COLORS, fmtUnit, COUNTRIES, REGIONS } from '../utils.js?v=20260522-mobile-ui18';
-import { showTooltip, hideTooltip } from '../components/tooltip.js';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { SEQ_COLORS, fmtUnit, COUNTRIES, REGIONS } from '../utils.js?v=20260906f';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
 
 let _svg, _g, _projection, _path, _colorFn;
 let _svg1, _g1, _svg2, _g2, _zoom, _yearOverride, _yearLabelId = 'map-year';
@@ -1010,18 +1010,68 @@ function _updateLegend(values) {
     const legendColors = isDiverging ? DIV_COLORS : SEQ_COLORS.slice(1);
 
     const unitLabel = unit && unit !== 'index100' ? ` (${unit})` : '';
-    const scaleLabel = State.get('scaleType') === 'log' ? ' - log' : '';
+    const scaleLabel = State.get('scaleType') === 'log' ? ' · escala logarítmica' : '';
+
+    // The bar used to show eight equal cells with only the two end labels, so a
+    // colour could not be read back as a value (INFORME.md 4.2, web_latam). The
+    // cells are now sampled from the very same colour function the map uses and
+    // each class boundary is ticked, with a label every other tick.
+    const N = legendColors.length;
+    const at = _legendValueAt(values, gMin, gMax, isDiverging);
+    const cells = [];
+    const ticks = [];
+    for (let i = 0; i < N; i++) {
+        const mid = at((i + 0.5) / N);
+        const col = (typeof _colorFn === 'function' && Number.isFinite(mid))
+            ? _colorFn(mid) : legendColors[i];
+        cells.push(`<div class="map-legend-cell" style="background:${col}"></div>`);
+    }
+    // On a narrow screen five labels collide, so the cadence widens instead of
+    // falling back to just the two ends (which is the bug being fixed here).
+    const every = window.innerWidth < 720 ? Math.max(2, Math.ceil(N / 2)) : 2;
+    for (let i = 0; i <= N; i++) {
+        const v = at(i / N);
+        const show = (i % every === 0) || i === N;
+        const pos = (i / N) * 100;
+        const edge = i === 0 ? ' at-start' : (i === N ? ' at-end' : '');
+        ticks.push(`<span class="map-legend-tick${edge}" style="left:${pos}%">` +
+                   `${show && Number.isFinite(v) ? fmtUnit(v, unit) : ''}</span>`);
+    }
+
     legend.innerHTML = `
         <div class="map-legend-title">${indicatorLabel}${unitLabel}${scaleLabel}</div>
-        <div class="map-legend-bar">
-            ${legendColors.map(c => `<div class="map-legend-cell" style="background:${c}"></div>`).join('')}
-        </div>
-        <div class="map-legend-labels">
-            <span>${fmtUnit(gMin, unit)}</span>
-            ${isDiverging ? '<span>0</span>' : ''}
-            <span>${fmtUnit(gMax, unit)}</span>
+        <div class="map-legend-bar">${cells.join('')}</div>
+        <div class="map-legend-labels map-legend-labels-ticked">${ticks.join('')}</div>
+        <div class="map-legend-foot">
+            <span class="map-legend-nodata"><i></i>Sin dato</span>
         </div>
     `;
+}
+
+/* Inverse of the transform _buildColorScale applies, so that a position on the
+   legend bar can be written back as a value. Mirrors that function branch by
+   branch on purpose: if the colour scale changes, this has to change with it.
+   Note the pow branch reads the year's own values, exactly as the map does. */
+function _legendValueAt(values, gMin, gMax, isDiverging) {
+    if (isDiverging) {
+        const absMax = Math.max(Math.abs(gMin), Math.abs(gMax));
+        return t => -absMax + t * 2 * absMax;
+    }
+    if (State.get('scaleType') === 'log') {
+        const safeMin = Math.max(1, gMin);
+        const sc = d3.scaleLog()
+            .domain([safeMin, Math.max(safeMin * 1.0001, gMax)])
+            .range([0, 1]).clamp(true);
+        return t => sc.invert(t);
+    }
+    const vMin = Math.max(0, d3.min(values));
+    const vMax = d3.max(values);
+    if (!Number.isFinite(vMin) || !Number.isFinite(vMax) || vMin === vMax) {
+        return () => vMax;
+    }
+    const sc = d3.scalePow().exponent(0.4)
+        .domain([vMin, vMax]).range([0, 1]).clamp(true);
+    return t => sc.invert(t);
 }
 
 function _getDataField() {

@@ -1,8 +1,8 @@
 /* table-view.js - Sortable data table */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { fmtUnit } from '../utils.js?v=20260522-mobile-ui18';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { fmtUnit } from '../utils.js?v=20260906f';
 
 let _container;
 let _sortCol = 'value';

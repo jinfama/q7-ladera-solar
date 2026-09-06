@@ -1,572 +1,1042 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas Agrario de Am&eacute;rica Latina</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23D4A032'/%3E%3Cpath d='M12 4v16M8 12c0-2 2-4 4-4M16 12c0-2-2-4-4-4M8 8c0-2 2-4 4-4M16 8c0-2-2-4-4-4' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260522-mobile-ui18">
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-<script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js" } }
-</script>
+<meta name="color-scheme" content="light">
+<title>Atlas Agrario de América Latina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cal:#EDE2C7; --ink:#231A15; --ink-2:#54443A; --ink-3:#7E6B57;
+  --cochinilla:#9A2B2B; --sinopia:#B5502F;
+  --display:'Archivo Black','Arial Black',Impact,sans-serif;
+  --text:Archivo,'Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html,body{height:100%;overflow:hidden}
+html{background:var(--cal);-webkit-text-size-adjust:100%}
+body{font-family:var(--text);color:var(--ink);background:var(--cal);line-height:1.42}
+
+/* the wall runs edge to edge behind everything */
+#wall,#fresco,#over,#plaster{position:fixed;inset:0;width:100%;height:100%;display:block}
+#wall{z-index:0}
+#fresco{z-index:1}
+#over{z-index:2;pointer-events:none}
+#plaster{z-index:4;pointer-events:none;mix-blend-mode:multiply;opacity:.44}
+
+.page{position:relative;z-index:3;height:100vh;height:100dvh;overflow:hidden;
+  display:flex;flex-direction:column;pointer-events:none}
+.page > *{pointer-events:auto}
+
+/* ---------- text column: as wide as its text needs, no wider ---------- */
+.col{width:max-content;max-width:min(430px,33vw);flex:1 1 auto;min-height:0;
+  padding:clamp(20px,3vh,36px) 0 clamp(14px,2.2vh,26px) clamp(20px,3.1vw,46px);
+  display:flex;flex-direction:column;justify-content:space-between;
+  gap:clamp(10px,1.6vh,20px);position:relative}
+.col > *{flex:0 0 auto}
+.col::before{content:"";position:absolute;inset:0 -130px 0 -60px;z-index:-1;
+  background:linear-gradient(90deg,rgba(237,226,199,.90) 0%,rgba(237,226,199,.84) 56%,rgba(237,226,199,0) 100%)}
+.mast{display:flex;flex-direction:column;gap:clamp(6px,.9vh,11px)}
+
+.eyebrow{display:flex;flex-wrap:wrap;gap:.4em .8em;align-items:center;
+  font-size:clamp(10px,.86vw,11.5px);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cochinilla)}
+.eyebrow i{display:inline-block;width:24px;height:8px;background:var(--sinopia);transform:rotate(-4deg)}
+.eyebrow span{color:#7a6650}
+h1{font-family:var(--display);font-weight:400;line-height:.97;
+  font-size:clamp(32px,4.4vw,58px);letter-spacing:-.018em;color:var(--ink);max-width:12ch}
+h1 em{font-style:normal;color:var(--cochinilla)}
+.lede{max-width:42ch;font-size:clamp(13px,1.06vw,16px);color:var(--ink-2);text-wrap:pretty}
+.lede b{color:#3d2f24;font-weight:700}
+
+/* the number that the whole picture is about */
+.fact{border-left:3px solid var(--cochinilla);padding-left:14px;max-width:38ch}
+.fact strong{display:block;font-family:var(--display);font-weight:400;
+  font-size:clamp(44px,5.4vw,78px);line-height:.9;color:var(--cochinilla);letter-spacing:-.03em}
+.fact span{display:block;margin-top:.45em;font-size:clamp(12.5px,.98vw,14.5px);color:var(--ink-2)}
+
+/* ---------- the index: a rail of links, no boxes ---------- */
+.rail{margin-top:auto;width:100%;border-top:1px solid rgba(35,26,21,.34);
+  background:linear-gradient(180deg,rgba(237,226,199,0) 0%,rgba(237,226,199,.86) 40%,rgba(237,226,199,.97) 100%);
+  display:flex;flex-wrap:wrap;align-items:stretch;
+  padding:0 clamp(14px,3.1vw,46px);gap:0 clamp(14px,2.3vw,32px)}
+.rail a{display:inline-flex;align-items:center;gap:9px;min-height:52px;padding:4px 0;
+  color:var(--ink-2);text-decoration:none;font-size:13px;font-weight:700;
+  border-bottom:2px solid transparent;transition:color .13s,border-color .13s}
+.rail a svg{flex:0 0 auto;width:15px;height:15px;stroke:var(--ink-3);fill:none;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .13s}
+.rail a:hover,.rail a:focus-visible{color:var(--cochinilla);border-bottom-color:var(--cochinilla);outline:none}
+.rail a:hover svg,.rail a:focus-visible svg{stroke:var(--cochinilla)}
+.rail a.lead{color:var(--ink)}
+.rail a.lead svg{stroke:var(--cochinilla)}
+.rail .spring{flex:1 1 auto;min-width:0}
+.rail .minor{font-weight:500;font-size:12.5px;color:var(--ink-3)}
+.rail .hints{position:relative;display:inline-flex;align-items:center;min-height:52px}
+.rail .hint,.rail .hint2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  color:#8a7862;transition:opacity .6s;white-space:nowrap}
+.rail .hint2{position:absolute;left:0;top:50%;transform:translateY(-50%);opacity:0}
+body.done .rail .hint{opacity:0}
+body.done .rail .hint2{opacity:1}
+
+.rise{opacity:0;transform:translateY(7px);animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
+.d1{animation-delay:.07s}.d2{animation-delay:.14s}.d3{animation-delay:.21s}
+@keyframes rise{to{opacity:1;transform:none}}
+
+@media (max-width:899px){
+  .col{max-width:none;width:auto;flex:0 0 auto;justify-content:flex-start;
+    padding:clamp(12px,2vh,18px) clamp(15px,4.6vw,22px) 4px;gap:clamp(6px,.9vh,10px)}
+  .col::before{inset:0 0 -20px 0;
+    background:linear-gradient(180deg,rgba(237,226,199,.95) 0%,rgba(237,226,199,.90) 72%,rgba(237,226,199,0) 100%)}
+  h1{font-size:clamp(30px,7.6vw,44px);max-width:none}
+  .lede{max-width:none;font-size:13.5px}
+  .fact{padding-left:11px}
+  .fact strong{font-size:44px}
+  .fact span{font-size:12.5px}
+  .rail{padding:0 clamp(13px,4.2vw,20px);gap:0 16px}
+  .rail a{min-height:46px;font-size:12.5px;gap:7px}
+  .rail .spring,.rail .hints{display:none}
+}
+@media (max-height:540px) and (orientation:landscape){
+  h1{font-size:clamp(24px,6.2vh,38px)}
+  .lede{font-size:12px}
+  .fact strong{font-size:28px}
+  .rail a{min-height:42px;font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rise{animation:none;opacity:1;transform:none}
+  .rail a{transition:none}
+  .rail .hint{display:none}
+  .rail .hint2{opacity:1;position:static;transform:none}
+}
+</style>
 </head>
 <body>
 
-<!-- Landing / Hero page -->
-<div class="landing mode-globo" id="landing">
-    <!-- Portada 1: GLOBO (default) — Three.js Earth + LATAM zoom + retro map -->
-    <canvas class="landing-globe" id="landing-globe"></canvas>
-    <canvas class="landing-particles" id="landing-particles"></canvas>
-    <div class="landing-retro-map" id="landing-retro-map"></div>
-    <div class="landing-cursor" id="landing-cursor" aria-hidden="true"></div>
+<svg id="wall" aria-hidden="true" preserveAspectRatio="none">
+  <defs>
+    <filter id="mottle" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0026 0.0034" numOctaves="3" seed="5" result="t"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.44  0 0 0 0 0.33  0 0 0 0 0.16  0 0 0 0.25 0"/>
+    </filter>
+    <filter id="lime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="2" seed="13" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.29  0 0 0 0 0.19  0 0 0 0.5 0"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="#EDE2C7"/>
+  <rect width="100%" height="100%" filter="url(#mottle)"/>
+</svg>
 
-    <!-- Portada 2: PAISAJE — pintura agraria con humo, nubes y brillos del r&iacute;o animados.
-         All FX live inside one SVG whose viewBox matches the painting's natural pixel
-         dimensions (1774x887) and uses xMidYMid slice — same crop behaviour as the
-         image's background-size: cover, so positions stay anchored to the chimneys
-         and the river regardless of viewport aspect ratio. -->
-    <div class="landing-paisaje" aria-hidden="true">
-        <div class="landing-paisaje-img"></div>
-        <svg class="landing-paisaje-fx" viewBox="0 0 1774 887" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <defs>
-                <radialGradient id="pf-white" cx="40%" cy="40%" r="55%">
-                    <stop offset="0%"  stop-color="#fbf5e6" stop-opacity="0.88"/>
-                    <stop offset="45%" stop-color="#d8cdb6" stop-opacity="0.5"/>
-                    <stop offset="100%" stop-color="#8c8276" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="pf-grey" cx="40%" cy="40%" r="55%">
-                    <stop offset="0%"  stop-color="#e8dfce" stop-opacity="0.78"/>
-                    <stop offset="45%" stop-color="#a89e90" stop-opacity="0.5"/>
-                    <stop offset="100%" stop-color="#5e5648" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="pf-dark" cx="40%" cy="40%" r="55%">
-                    <stop offset="0%"  stop-color="#574b40" stop-opacity="0.85"/>
-                    <stop offset="45%" stop-color="#322a23" stop-opacity="0.55"/>
-                    <stop offset="100%" stop-color="#18120e" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="pf-spark" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%"  stop-color="#fff6d8" stop-opacity="1"/>
-                    <stop offset="60%" stop-color="#ffdfa0" stop-opacity="0.5"/>
-                    <stop offset="100%" stop-color="#ffba60" stop-opacity="0"/>
-                </radialGradient>
-                <filter id="pf-blur" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="9"/>
-                </filter>
-                <filter id="pf-blur-tight" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="4"/>
-                </filter>
-            </defs>
+<canvas id="fresco" aria-hidden="true"></canvas>
+<canvas id="over" aria-hidden="true"></canvas>
 
-            <!-- ============ SMOKE COLUMNS ============
-                 Each <g> is anchored at a chimney/locomotive on the painting (image-pixel
-                 coords). Inside, 3 circles cycle through animateTransform/animate so a
-                 continuous column of puffs rises. Three smoke palettes — pf-white for the
-                 sugar mill, pf-grey for the factory, pf-dark for the locomotive. -->
+<svg id="plaster" aria-hidden="true" preserveAspectRatio="none">
+  <rect width="100%" height="100%" filter="url(#lime)"/>
+</svg>
 
-            <!-- LEFT — sugar mill / ingenio at top-left of painting -->
-            <g class="smoke-src" transform="translate(115 200)">
-                <circle r="32" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="34" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" begin="1.7s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" begin="1.7s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="30" fill="url(#pf-white)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.2s" begin="3.4s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.2s" begin="3.4s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-            <g class="smoke-src" transform="translate(170 235)">
-                <circle r="22" fill="url(#pf-grey)" filter="url(#pf-blur-tight)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.7;0.4;0" keyTimes="0;0.12;0.6;1" dur="4.8s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,8; 8,-60; 18,-150; 35,-230" keyTimes="0;0.3;0.7;1" dur="4.8s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="22" fill="url(#pf-grey)" filter="url(#pf-blur-tight)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.7;0.4;0" keyTimes="0;0.12;0.6;1" dur="4.8s" begin="2.4s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,8; 8,-60; 18,-150; 35,-230" keyTimes="0;0.3;0.7;1" dur="4.8s" begin="2.4s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-
-            <!-- RIGHT — factory cluster (4 chimneys) -->
-            <g class="smoke-src" transform="translate(1320 200)">
-                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" begin="1.9s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" begin="1.9s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="28" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.78;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.6s" begin="3.7s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 14,-80; 30,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.6s" begin="3.7s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-            <g class="smoke-src" transform="translate(1390 185)">
-                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" begin="2.0s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" begin="2.0s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="32" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.82;0.5;0" keyTimes="0;0.12;0.6;1" dur="6.0s" begin="4.0s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 16,-90; 34,-200; 60,-320" keyTimes="0;0.3;0.7;1" dur="6.0s" begin="4.0s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-            <g class="smoke-src" transform="translate(1460 170)">
-                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" begin="1.8s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" begin="1.8s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="36" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.85;0.55;0" keyTimes="0;0.12;0.6;1" dur="5.4s" begin="3.6s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 18,-90; 38,-200; 65,-320" keyTimes="0;0.3;0.7;1" dur="5.4s" begin="3.6s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-            <g class="smoke-src" transform="translate(1530 195)">
-                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" begin="1.7s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" begin="1.7s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="26" fill="url(#pf-grey)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.75;0.45;0" keyTimes="0;0.12;0.6;1" dur="5.0s" begin="3.3s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 12,-70; 28,-180; 50,-280" keyTimes="0;0.3;0.7;1" dur="5.0s" begin="3.3s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-
-            <!-- TRAIN — locomotive on the lower-right tracks, dark coal smoke drifting strongly right -->
-            <g class="smoke-src" transform="translate(1620 360)">
-                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" begin="1.4s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" begin="1.4s" repeatCount="indefinite"/>
-                </circle>
-                <circle r="34" fill="url(#pf-dark)" filter="url(#pf-blur)" opacity="0">
-                    <animate attributeName="opacity" values="0;0.88;0.55;0" keyTimes="0;0.1;0.6;1" dur="4.2s" begin="2.8s" repeatCount="indefinite"/>
-                    <animateTransform attributeName="transform" type="translate" values="0,10; 40,-50; 90,-120; 160,-220" keyTimes="0;0.3;0.7;1" dur="4.2s" begin="2.8s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-
-            <!-- ============ CLOUDS ============
-                 Two stacked soft-ellipse bands. The whole <g> translates from 0 to -440
-                 over its duration; an extra "tile" of clouds at +1774 keeps the band
-                 seamless as it scrolls. -->
-            <g class="cloud-band cloud-band-1" opacity="0.55">
-                <ellipse cx="200"  cy="65"  rx="140" ry="20" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="540"  cy="50"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="980"  cy="80"  rx="150" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="1400" cy="60"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="1974" cy="65"  rx="140" ry="20" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="2314" cy="50"  rx="170" ry="22" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <animateTransform attributeName="transform" type="translate" from="0 0" to="-440 0" dur="55s" repeatCount="indefinite"/>
-            </g>
-            <g class="cloud-band cloud-band-2" opacity="0.4">
-                <ellipse cx="120"  cy="135" rx="100" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="460"  cy="125" rx="120" ry="16" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="860"  cy="145" rx="110" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="1240" cy="130" rx="140" ry="18" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="1700" cy="140" rx="110" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <ellipse cx="1894" cy="135" rx="100" ry="14" fill="#fbf5e6" filter="url(#pf-blur)"/>
-                <animateTransform attributeName="transform" type="translate" from="0 0" to="-380 0" dur="85s" repeatCount="indefinite"/>
-            </g>
-
-            <!-- ============ RIVER SPARKLES ============
-                 Tiny warm dots scattered along the river curve; each one fades in/out
-                 with a staggered cycle so the water appears to glint without a visible
-                 line. No path, no stroke — just sun reflections. -->
-            <g class="river-sparkles">
-                <circle cx="1290" cy="295" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.0s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="1200" cy="330" r="5" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.6s" begin="0.4s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="1080" cy="370" r="7" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.4s" begin="0.8s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="960" cy="420" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="820" cy="480" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="660" cy="540" r="7" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.4s" begin="1.6s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="480" cy="620" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.0s" begin="0.6s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="300" cy="685" r="6" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="2.8s" begin="1.0s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="160" cy="720" r="5" fill="url(#pf-spark)" filter="url(#pf-blur-tight)">
-                    <animate attributeName="opacity" values="0;1;0.4;0" keyTimes="0;0.4;0.7;1" dur="3.4s" begin="1.4s" repeatCount="indefinite"/>
-                </circle>
-            </g>
-        </svg>
-
-        <!-- Title backdrop — strong dark veil concentrated where the ATLAS title sits,
-             so the cream typography reads clearly over the painted sky. -->
-        <div class="paisaje-veil" aria-hidden="true"></div>
-        <!-- Soft sunset glow on the right edge — pulses gently -->
-        <div class="paisaje-rays" aria-hidden="true"></div>
+<main class="page">
+  <div class="col" id="col">
+    <div class="mast">
+      <p class="eyebrow rise"><i></i><span>Historia agraria</span><span>Am&eacute;rica Latina</span><span>1900&ndash;2024</span></p>
+      <h1 class="rise d1">Atlas Agrario <em>de Am&eacute;rica Latina</em></h1>
+      <p class="lede rise d2">Un visor para mirar el campo latinoamericano a lo largo de un siglo: qu&eacute; se cultiva y d&oacute;nde, cu&aacute;nta tierra ocupa, qui&eacute;n lo trabaja y por d&oacute;nde sale hacia fuera.</p>
     </div>
 
-    <!-- Switcher: 2 portadas — top-right corner -->
-    <nav class="landing-switcher" id="landing-switcher" aria-label="Estilo de portada">
-        <span class="ls-label">Portada</span>
-        <button data-mode="globo" class="active" type="button">Globo</button>
-        <span class="ls-sep">&middot;</span>
-        <button data-mode="paisaje" type="button">Paisaje</button>
-    </nav>
-
-    <div class="landing-content" id="landing-content">
-        <div class="landing-top">
-            <div class="landing-atlas">ATLAS</div>
-            <h1 class="landing-title">Agrario de Am&eacute;rica Latina</h1>
-            <div class="landing-rule"></div>
-            <p class="landing-subtitle">Producci&oacute;n, comercio y trabajo agrario en perspectiva hist&oacute;rica</p>
-            <div class="landing-progress" id="landing-progress">
-                <div class="landing-bar"></div>
-            </div>
-            <button class="landing-cta" id="landing-cta" style="display:none">
-                Explorar el atlas
-                <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z" fill="currentColor"/></svg>
-            </button>
-        </div>
+    <div class="fact rise d3">
+      <strong>&times;32</strong>
+      <span>Es lo que creci&oacute; la producci&oacute;n agraria de la regi&oacute;n entre 1900 y 2023. Esa curva es lo primero que se dibuja en el muro; luego se pliega en la costa atl&aacute;ntica de Brasil y el continente se cubre al ritmo al que la producci&oacute;n crece.</span>
     </div>
-</div>
+  </div>
 
-<!-- Tooltip -->
-<div class="tooltip" id="tooltip"></div>
+  <nav class="rail" aria-label="Secciones del atlas">
+    <a class="lead" href="visor.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+      <span>Explorar el atlas</span></a>
+    <a href="docs/metodologia.md">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+      <span>Datos y metodolog&iacute;a</span></a>
+    <a href="visor.html#view=about">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/><path d="M8 7h8M8 11h6"/></svg>
+      <span>Equipo y publicaciones</span></a>
+    <span class="spring" aria-hidden="true"></span>
+    <span class="hints" aria-hidden="true"><span class="hint">Toca o Esc para ver el fresco terminado</span><span class="hint2">Pasa el cursor por un pa&iacute;s</span></span>
+    <a class="minor" href="visor.html#cat=trade&amp;view=map">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>
+      <span>Comercio exterior</span></a>
+    <a class="minor" href="visor.html#cat=agriculture&amp;view=trend">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M6 16c3-1 4.5-4 6.5-6.5S17 5 21 5"/></svg>
+      <span>Producci&oacute;n, 1900-2023</span></a>
+  </nav>
+</main>
 
-<!-- App -->
-<div id="app">
-    <!-- Atlas-like dark sidebar for views -->
-    <nav class="sidebar">
-        <div class="sb-categories" id="sidebar"></div>
-        <button class="sb-info-btn about-toggle-btn" id="btn-info" data-action="about" title="Informaci&oacute;n de la web" aria-label="Informaci&oacute;n de la web">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            <span class="sb-info-label">Info web</span>
-        </button>
-    </nav>
+<script src="portada/latam-topo.js"></script>
+<script src="portada/latam.js"></script>
+<script>
+(function(){
+'use strict';
+/* ------------------------------------------------------------------
+   Costa al fresco, en tres tiempos.
 
-    <!-- Hidden indicator panel (populated by JS, used as data source for dropdown) -->
-    <aside class="ind-panel hidden" id="ind-panel"></aside>
+   1. A real series - the agrarian production of the 21 countries of the
+      atlas, 1900-2023, which multiplied by 32 - is drawn as a growth
+      curve that fills the wall.
+   2. That curve folds into the Atlantic shoreline of Brazil, the longest
+      and most recognisable arc on the continent.
+   3. The rest of the continent is drawn in sinopia over a graticule that
+      charts the whole wall, and then the wall takes colour: every brush
+      mark is a fixed amount of product, so the density of paint on each
+      country is its output, and the pigment says which group it belongs
+      to. The key sits directly under the map it explains.
+   ------------------------------------------------------------------ */
+var CHART_END=2.95, FOLD_END=4.55, DRAW_END=5.35, PAINT_END=7.70, END=7.95;
+var RAD=Math.PI/180;
+var REDUCED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var T=window.LATAM_TOPO, L=window.LATAM, body=document.body;
+window.__fps=0;
+if(!T||!L||!T.objects||!T.objects.countries){body.classList.add('done');return;}
 
-    <!-- Main content area -->
-    <div class="main">
-        <!-- Query bar: reads like a sentence -->
-        <div class="query-bar">
-            <div class="query-segment query-cat-segment">
-                <button class="query-btn query-cat-btn" id="query-cat" title="Categor&iacute;a">
-                    <svg class="query-cat-icon" viewBox="0 0 24 24" id="query-cat-icon"></svg>
-                    <span id="category-label">Cultivos</span>
-                    <svg class="query-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-                </button>
-                <div class="query-dropdown" id="query-cat-dropdown"></div>
-            </div>
-            <span class="query-sep">/</span>
-            <span class="query-breadcrumb" id="indicator-label">Producci&oacute;n</span>
-            <!-- Selection chips (inline inside query bar) -->
-            <div class="selection-bar" id="selection-bar"></div>
-            <div class="query-spacer"></div>
-            <button class="query-icon-btn indicator-info-btn" id="btn-indicator-info" type="button" aria-label="Informaci&oacute;n del indicador" data-info="">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
-                    <path d="M12 10v7M12 7h.01" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
-                </svg>
-            </button>
-            <button class="query-icon-btn panel-toggle-btn" id="btn-toggle-panel" type="button" title="Opciones" aria-label="Abrir opciones">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path class="panel-toggle-gear" d="M12 8.35a3.65 3.65 0 1 0 0 7.3 3.65 3.65 0 0 0 0-7.3z" fill="none" stroke="currentColor" stroke-width="1.65"/>
-                    <path class="panel-toggle-gear" d="M19.45 13.3a7.8 7.8 0 0 0 0-2.6l2.05-1.45-2-3.46-2.45 1a7.2 7.2 0 0 0-2.25-1.3L14.5 3h-4l-.3 2.49a7.2 7.2 0 0 0-2.25 1.3l-2.45-1-2 3.46 2.05 1.45a7.8 7.8 0 0 0 0 2.6L3.5 14.75l2 3.46 2.45-1a7.2 7.2 0 0 0 2.25 1.3l.3 2.49h4l.3-2.49a7.2 7.2 0 0 0 2.25-1.3l2.45 1 2-3.46-2.05-1.45z" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/>
-                </svg>
-            </button>
-        </div>
+function hash(a,b){var x=(a*374761393+b*668265263+22222)|0;
+  x=Math.imul(x^(x>>>13),1274126177);return ((x^(x>>>16))>>>0)/4294967296;}
+function rng(seed){var a=seed>>>0;return function(){a|=0;a=(a+0x6D2B79F5)|0;
+  var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;
+  return ((t^(t>>>14))>>>0)/4294967296;};}
+function smoothstep(t){return t*t*(3-2*t);}
+function n1(x,sd){var i0=Math.floor(x),f=x-i0,a=hash(i0,sd),b=hash(i0+1,sd);return (a+(b-a)*smoothstep(f))*2-1;}
+function fbm(x,sd){return n1(x,sd)*0.62+n1(x*2.31,sd+7)*0.26+n1(x*4.7,sd+19)*0.12;}
+function clamp01(x){return x<0?0:x>1?1:x;}
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
 
-        <!-- Visualization panels -->
-        <div class="viz-container">
+/* ---------- TopoJSON decode (no library, works on file://) ---------- */
+var sc=T.transform?T.transform.scale:[1,1], tr=T.transform?T.transform.translate:[0,0];
+var arcsGeo=T.arcs.map(function(a){var x=0,y=0,out=[];
+  for(var i=0;i<a.length;i++){x+=a[i][0];y+=a[i][1];out.push([x*sc[0]+tr[0],y*sc[1]+tr[1]]);}
+  return out;});
+function ringOf(ringArcs){var pts=[];
+  for(var j=0;j<ringArcs.length;j++){var idx=ringArcs[j],
+    a=idx<0?arcsGeo[~idx].slice().reverse():arcsGeo[idx];
+    for(var k=(pts.length?1:0);k<a.length;k++)pts.push(a[k]);}
+  return pts;}
+var geoms=T.objects.countries.geometries.map(function(g){
+  var polys=g.type==='Polygon'?[g.arcs]:g.arcs;
+  return {iso:g.properties.iso3,name:g.properties.name,region:g.properties.region,
+          rings:polys.map(function(p){return p.map(ringOf);})};
+});
 
+/* ---------- the Atlantic arc of Brazil, in lon/lat ----------
+   The east side of the country's biggest ring, from its far south to its
+   far north, trimmed at the mouth of the Amazon so what is left is coast
+   and only coast. */
+function brazilAtlantic(){
+  var g=null,i;
+  for(i=0;i<geoms.length;i++)if(geoms[i].iso==='BRA')g=geoms[i];
+  if(!g)return null;
+  var best=null;
+  g.rings.forEach(function(poly){poly.forEach(function(r){
+    if(!best||r.length>best.length)best=r;});});
+  if(!best||best.length<60)return null;
+  var iS=0,iN=0;
+  for(i=0;i<best.length;i++){
+    if(best[i][1]<best[iS][1])iS=i;      /* far south: smallest latitude  */
+    if(best[i][1]>best[iN][1])iN=i;      /* far north: largest latitude   */
+  }
+  var A=iS<iN?best.slice(iS,iN+1):best.slice(iS).concat(best.slice(0,iN+1));
+  var B=iN<iS?best.slice(iN,iS+1):best.slice(iN).concat(best.slice(0,iS+1));
+  function mlon(c){var s=0;for(var q=0;q<c.length;q++)s+=c[q][0];return s/c.length;}
+  var E=mlon(A)>mlon(B)?A:B;
+  if(E[0][1]>E[E.length-1][1])E=E.slice().reverse();   /* run it south to north */
+  /* stop at the Amazon: past that the outline is border, not shore */
+  var cut=E.length;
+  for(i=0;i<E.length;i++)if(E[i][1]>0.6){cut=i;break;}
+  E=E.slice(0,Math.max(40,cut));
+  return E;
+}
+var BRA_COAST=brazilAtlantic();
 
-            <div class="viz-panel active" id="panel-map">
-                <div class="map-container" id="map-container" style="flex:1; border-right:1px solid var(--c-border); position:relative;">
-                    <div class="map-year" id="map-year"></div>
-                    <svg class="map-svg" id="map-svg"></svg>
-                    <div class="map-legend" id="map-legend"></div>
-                </div>
-                <div class="map-container" id="map-container-2" style="flex:1; display:none; position:relative;">
-                    <div class="map-year" id="map-year-2"></div>
-                    <svg class="map-svg" id="map-svg-2"></svg>
-                    <button id="btn-close-compare" style="position:absolute; top:12px; right:16px; padding:4px 10px; background:var(--c-bg); border:1px solid var(--c-border); cursor:pointer; border-radius:4px; font-size:11px; z-index:10; opacity:0.7;" title="Cerrar comparación">&times;</button>
-                </div>
-            </div>
-            <div class="viz-panel" id="panel-trend">
-                <div class="chart-container" id="trend-chart-container">
-                    <svg class="chart-svg" id="trend-svg"></svg>
-                    <div class="chart-empty" id="trend-empty">Selecciona uno o m&aacute;s pa&iacute;ses para ver la evoluci&oacute;n</div>
-                </div>
-            </div>
-            <div class="viz-panel" id="panel-treemap">
-                <div class="treemap-container" id="treemap-container">
-                    <div class="treemap-header" id="treemap-header"></div>
-                    <div class="treemap-chart" id="treemap-chart"></div>
-                </div>
-            </div>
-            <div class="viz-panel" id="panel-ranking">
-                <div class="ranking-container" id="ranking-container"></div>
-            </div>
-            <div class="viz-panel" id="panel-table">
-                <div class="table-container" id="table-container"></div>
-            </div>
-            <div class="viz-panel" id="panel-bilateral">
-                <div class="bilateral-controls" id="bilateral-controls">
-                    <div class="bc-group">
-                        <label class="bc-label">EXPORTADOR</label>
-                        <select class="bc-select" id="bc-exporter"></select>
-                    </div>
-                    <button class="bc-swap" id="bc-swap" title="Intercambiar">&#8644;</button>
-                    <div class="bc-group">
-                        <label class="bc-label">DESTINO</label>
-                        <select class="bc-select" id="bc-importer" disabled title="Todos los socios comerciales">
-                            <option value="world">Todos</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="bilateral-container" id="bilateral-container" style="flex:1; position:relative;">
-                    <div class="map-year" id="bilateral-year"></div>
-                    <svg class="map-svg" id="bilateral-svg"></svg>
-                    <div class="map-legend" id="bilateral-legend"></div>
-                    <div class="bilateral-info" id="bilateral-info"></div>
-                </div>
-            </div>
-            <div class="viz-panel" id="panel-country">
-                <div class="country-panel-container" id="country-panel-container"></div>
-            </div>
-            <div class="viz-panel" id="panel-about">
-                <div class="about-container" id="about-container">
-                    <div class="about-content">
-                        <h1>Atlas Agrario de Am&eacute;rica Latina</h1>
-                        <p class="about-lead">Plataforma de datos hist&oacute;ricos sobre producci&oacute;n agr&iacute;cola, comercio, ganader&iacute;a y trabajo agrario en Am&eacute;rica Latina.</p>
-                        <div class="about-nav" id="about-nav">
-                            <button class="about-nav-btn active" data-section="equipo">Equipo</button>
-                            <button class="about-nav-btn" data-section="metodologia">Metodolog&iacute;a</button>
-                            <button class="about-nav-btn" data-section="cobertura">Cobertura</button>
-                            <button class="about-nav-btn" data-section="publicaciones">Publicaciones</button>
-                        </div>
-                        <div class="about-section active" id="about-equipo">
-                            <div class="about-team-grid">
-                                <article class="about-card">
-                                    <div class="about-avatar"><img src="img/juaninfante.jpg" alt="Juan Infante-Amate"></div>
-                                    <div class="about-card-name">Juan Infante-Amate</div>
-                                    <div class="about-card-role">Universidad de Granada</div>
-                                    <div class="about-card-desc">Historia ambiental y econ&oacute;mica agraria</div>
-                                    <div class="about-card-links">
-                                        <a href="assets/cv/infante_CV_extended_ES.pdf" target="_blank" rel="noopener" title="CV" aria-label="CV"><img src="assets/img/team/cv-1.png" alt=""></a>
-                                        <a href="https://scholar.google.com/citations?user=s89YchgAAAAJ" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar"><img src="assets/img/team/google-scholar-1.png" alt=""></a>
-                                        <a href="https://www.researchgate.net/profile/Juan-Infante-Amate" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
-                                        <a href="https://www.ugr.es/en/staff/juan-infante-amate" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
-                                    </div>
-                                </article>
-                                <article class="about-card">
-                                    <div class="about-avatar"><img src="img/alexander-urrego.jpg" alt="Alexander Urrego Mesa"></div>
-                                    <div class="about-card-name">Alexander Urrego Mesa</div>
-                                    <div class="about-card-role">Universitat de Barcelona</div>
-                                    <div class="about-card-desc">Historia econ&oacute;mica y metabolismo agrario</div>
-                                    <div class="about-card-links">
-                                        <a href="https://webgrec.ub.edu/webpages/000005/cas/alex.urrego.mesa.ub.edu.html" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
-                                        <a href="https://www.scopus.com/authid/detail.uri?authorId=57205240733" target="_blank" rel="noopener" title="Scopus" aria-label="Scopus"><span class="about-link-text">Sc</span></a>
-                                        <a href="https://orcid.org/0000-0002-8256-0321" target="_blank" rel="noopener" title="ORCID" aria-label="ORCID"><span class="about-link-text">iD</span></a>
-                                    </div>
-                                </article>
-                                <article class="about-card">
-                                    <div class="about-avatar"><img src="img/eduardo.jpg" alt="Eduardo Aguilera"></div>
-                                    <div class="about-card-name">Eduardo Aguilera</div>
-                                    <div class="about-card-role">CSIC &middot; IEGD</div>
-                                    <div class="about-card-desc">Agroecolog&iacute;a y cambio clim&aacute;tico</div>
-                                    <div class="about-card-links">
-                                        <a href="https://scholar.google.es/citations?user=3c01eqQAAAAJ" target="_blank" rel="noopener" title="Google Scholar" aria-label="Google Scholar"><img src="assets/img/team/google-scholar-1.png" alt=""></a>
-                                        <a href="https://www.researchgate.net/profile/Eduardo-Aguilera" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
-                                        <a href="https://iegd.csic.es/es/personal/eduardo-manuel-aguilera-fernandez" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
-                                    </div>
-                                </article>
-                                <article class="about-card">
-                                    <div class="about-avatar"><img src="img/marc-badia.jpg" alt="Marc Badia-Mir&oacute;"></div>
-                                    <div class="about-card-name">Marc Badia-Mir&oacute;</div>
-                                    <div class="about-card-role">Universitat de Barcelona</div>
-                                    <div class="about-card-desc">Historia econ&oacute;mica de Am&eacute;rica Latina</div>
-                                    <div class="about-card-links">
-                                        <a href="https://www.ub.edu/school-economics/researchers/badia-marc/" target="_blank" rel="noopener" title="Web" aria-label="Web"><img src="assets/img/team/web.png" alt=""></a>
-                                        <a href="https://www.researchgate.net/profile/Marc-Badia-Miro" target="_blank" rel="noopener" title="ResearchGate" aria-label="ResearchGate"><img src="assets/img/team/ResearchGate_icon_SVG.svg.png" alt=""></a>
-                                        <a href="https://orcid.org/0000-0001-5326-1819" target="_blank" rel="noopener" title="ORCID" aria-label="ORCID"><span class="about-link-text">iD</span></a>
-                                        <a href="https://webofscience.com/wos/author/record/D-8431-2011" target="_blank" rel="noopener" title="Web of Science" aria-label="Web of Science"><span class="about-link-text">WoS</span></a>
-                                    </div>
-                                </article>
-                            </div>
-                        </div>
-                        <div class="about-section" id="about-metodologia">
-                            <div class="method-accordion" id="method-cards">
-                                <details class="method-card method-detail" open>
-                                    <summary>
-                                        <span>
-                                            <span class="method-kicker">Base principal</span>
-                                            <strong>Series agrarias nacionales</strong>
-                                        </span>
-                                    </summary>
-                                    <div class="method-detail-body">
-                                        <p>Cultivos, uso del suelo, ganader&iacute;a y comercio directo se organizan como paneles pa&iacute;s-a&ntilde;o comparables. El criterio del visor es separar observaci&oacute;n, armonizaci&oacute;n y estimaci&oacute;n: las series originales se preservan en la base de trabajo y el visor presenta las variables finales ya normalizadas.</p>
-                                        <p>El documento general del proyecto cubrir&aacute; esta base agraria completa, excepto los m&oacute;dulos de trabajo y desigualdad, que necesitan notas y citas propias.</p>
-                                    </div>
-                                </details>
-                                <details class="method-card method-detail">
-                                    <summary>
-                                        <span>
-                                            <span class="method-kicker">Comercio</span>
-                                            <strong>Comercio directo y bilateral</strong>
-                                        </span>
-                                    </summary>
-                                    <div class="method-detail-body">
-                                        <p>El comercio directo resume exportaciones, importaciones y balanza por territorio y producto. El comercio bilateral a&ntilde;ade socios comerciales y permite consultar flujos origen-destino, productos y rankings de socios cuando la matriz bilateral existe.</p>
-                                        <p>Cuando el visor muestra agregados regionales, estos proceden de la suma o agregaci&oacute;n regional definida en la base procesada. Las futuras notas de descarga deber&iacute;an distinguir dato observado, agregado regional y estimaci&oacute;n.</p>
-                                    </div>
-                                </details>
-                                <details class="method-card method-detail">
-                                    <summary>
-                                        <span>
-                                            <span class="method-kicker">Territorio</span>
-                                            <strong>Cobertura subnacional</strong>
-                                        </span>
-                                    </summary>
-                                    <div class="method-detail-body">
-                                        <p>El nivel subnacional se activa s&oacute;lo cuando existen geometr&iacute;as y datos admin1. Si no hay dato subnacional real para un indicador, el visor debe evitar mezclarlo con detalle provincial y mostrar con claridad el dato nacional o bloquear el nivel, seg&uacute;n el caso.</p>
-                                        <p>La cobertura var&iacute;a por pa&iacute;s, a&ntilde;o e indicador. Por eso se a&ntilde;ade una pesta&ntilde;a espec&iacute;fica de cobertura calculada desde los JSON actuales del visor.</p>
-                                    </div>
-                                </details>
-                                <details class="method-card method-detail">
-                                    <summary>
-                                        <span>
-                                            <span class="method-kicker">M&oacute;dulos externos</span>
-                                            <strong>Trabajo y desigualdad</strong>
-                                        </span>
-                                    </summary>
-                                    <div class="method-detail-body">
-                                        <p>Trabajo y desigualdad se tratar&aacute;n como secciones metodol&oacute;gicas separadas porque proceden de fuentes externas y criterios espec&iacute;ficos. En desigualdad, las observaciones originales de Gini y reforma agraria deben citarse por autor y fuente; las interpolaciones o agregaciones regionales deben marcarse como elaboraci&oacute;n propia.</p>
-                                        <p><strong>Suggested citation:</strong> Infante-Amate and Escalante (forthcoming). <em>Agricultural Labour Database for Latin America</em>.</p>
-                                    </div>
-                                </details>
-                                <div class="method-footer-link">
-                                    <a class="method-link" href="docs/metodologia.md" target="_blank" rel="noopener">Abrir borrador metodol&oacute;gico general</a>
-                                    <span class="method-link muted">Zenodo record and data paper: forthcoming DOI</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="about-section" id="about-cobertura">
-                            <div class="coverage-summary" id="coverage-summary">Pulsa esta pesta&ntilde;a para calcular la cobertura desde los datos cargados por el visor.</div>
-                            <div class="coverage-grid" id="coverage-grid"></div>
-                        </div>
-                        <div class="about-section" id="about-publicaciones">
-                            <p class="about-placeholder">Listado de publicaciones pr&oacute;ximamente.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+/* Lambert azimuthal equal-area centred on the continent */
+var l0=-70*RAD,p0=-12*RAD,sp0=Math.sin(p0),cp0=Math.cos(p0);
+function proj(lon,lat){var l=lon*RAD-l0,p=lat*RAD,sp=Math.sin(p),cp=Math.cos(p),cl=Math.cos(l);
+  var kk=Math.sqrt(2/(1+sp0*sp+cp0*cp*cl));
+  return [kk*cp*Math.sin(l),-kk*(cp0*sp-sp0*cp*cl)];}
+var arcsP=arcsGeo.map(function(a){return a.map(function(c){return proj(c[0],c[1]);});});
+var geomsP=geoms.map(function(g){
+  return {iso:g.iso,name:g.name,region:g.region,
+          rings:g.rings.map(function(poly){return poly.map(function(r){
+            return r.map(function(c){return proj(c[0],c[1]);});});})};
+});
+var coastP=BRA_COAST?BRA_COAST.map(function(c){return proj(c[0],c[1]);}):null;
+var bb=[Infinity,Infinity,-Infinity,-Infinity];
+arcsP.forEach(function(a){a.forEach(function(c){
+  if(c[0]<bb[0])bb[0]=c[0];if(c[1]<bb[1])bb[1]=c[1];
+  if(c[0]>bb[2])bb[2]=c[0];if(c[1]>bb[3])bb[3]=c[1];});});
+if(!coastP){body.classList.add('done');}
 
-        <!-- Timeline -->
-        <div class="timeline">
-            <button class="tl-play" id="tl-play">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <button class="tl-speed" id="tl-speed">4x</button>
-            <input class="tl-year-input" id="tl-year-start" type="number" title="A&ntilde;o inicio">
-            <div class="tl-track" id="tl-track">
-                <div class="tl-rail"></div>
-                <div class="tl-range-fill" id="tl-range-fill"></div>
-                <div class="tl-handle" id="tl-handle-from">
-                    <div class="tl-handle-label" id="tl-label-from"></div>
-                </div>
-                <div class="tl-handle" id="tl-handle-to">
-                    <div class="tl-handle-label" id="tl-label-to"></div>
-                </div>
-            </div>
-            <input class="tl-year-input" id="tl-year-end" type="number" title="A&ntilde;o fin">
-            <div class="tl-year" id="tl-year">2020</div>
-        </div>
+/* ---------- the series that becomes the shore ---------- */
+var PY=L.production_years, AG=(L.production&&L.production.latin_america)||null;
+var Y0=1900,Y1=2023,i0=PY.indexOf(Y0),i1=PY.indexOf(Y1);
+if(i0<0)i0=0;if(i1<0)i1=PY.length-1;
+var SER=[],last=0,q;
+for(q=i0;q<=i1;q++){var v=AG?AG.production_t[q]:null;if(v==null)v=last;else last=v;SER.push(v);}
+var NSER=SER.length,serMax=0;
+for(q=0;q<NSER;q++)if(SER[q]>serMax)serMax=SER[q];
+if(!serMax)serMax=1;
 
-        <!-- Footer -->
-        <div class="footer">
-            <span id="footer-source">Fuente: FAO &middot; FAOSTAT &middot; IIA &middot; Estad&iacute;sticas nacionales</span>
-            <div class="footer-actions">
-                <button class="footer-btn footer-about-btn about-toggle-btn" id="btn-about-footer" data-action="about" title="Acerca de la web" aria-label="Acerca de la web">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zm.95 14.7h-1.9v-6.4h1.9v6.4zm0-8.2h-1.9V7.1h1.9V9z" fill="currentColor"/></svg>
-                    <span>Acerca</span>
-                </button>
-                <button class="footer-btn" id="btn-csv" title="Descargar datos del panel actual">Descargar datos</button>
-                <button class="footer-btn" id="btn-fs">Pantalla completa</button>
-            </div>
-        </div>
-    </div>
+function serie(iso){var p=L.production&&L.production[iso];
+  if(!p||!p.production_t)return null;
+  var s=p.production_t.slice(i0,i1+1),lv=0;
+  for(var j=0;j<s.length;j++){if(s[j]==null)s[j]=lv;else lv=s[j];}
+  return s;}
+var totalEnd=0;
+geomsP.forEach(function(g){g.s=serie(g.iso);g.end=g.s?g.s[g.s.length-1]:0;totalEnd+=g.end;});
 
-    <!-- Right panel: options, products, territories -->
-    <aside class="right-panel" id="right-panel">
-      <div class="right-panel-resizer" id="right-panel-resizer" title="Cambiar ancho del panel"></div>
-      <button class="right-panel-close" id="right-panel-close" type="button" aria-label="Cerrar opciones">
-        <span>Opciones abiertas</span>
-        <strong>Cerrar</strong>
-      </button>
-      <div class="rp-section" id="rp-options">
-        <button class="rp-section-header" type="button">OPCIONES</button>
-        <div class="rp-section-body" id="rp-options-body"></div>
-      </div>
-      <div class="rp-section" id="rp-products" style="display:none">
-        <button class="rp-section-header" id="rp-products-header" type="button">PRODUCTOS</button>
-        <div class="rp-section-body rp-scrollable" id="rp-products-body">
-          <div class="rp-search"><input type="text" id="rp-product-search" placeholder="Buscar..."></div>
-          <div id="rp-product-list"></div>
-        </div>
-      </div>
-      <div class="rp-section" id="rp-partners" style="display:none">
-        <button class="rp-section-header" id="rp-partners-header" type="button">SOCIOS</button>
-        <div class="rp-section-body rp-scrollable" id="rp-partners-body">
-          <div class="rp-search"><input type="text" id="rp-partner-search" placeholder="Buscar socio..."></div>
-          <div id="rp-partner-list"></div>
-        </div>
-      </div>
-      <div class="rp-section" id="rp-territories">
-        <button class="rp-section-header" type="button">TERRITORIOS</button>
-        <div class="rp-section-body rp-scrollable" id="rp-territories-body">
-          <div id="rp-level-pills"></div>
-          <div class="rp-search"><input type="text" id="rp-territory-search" placeholder="Buscar pa&iacute;s..."></div>
-          <div id="rp-territory-list"></div>
-        </div>
-      </div>
-    </aside>
-</div>
+/* ---------- fresco palette: what wet lime can actually hold ----------
+   Ground earths, cochineal lake and greyed indigo, all bleached by the
+   plaster. The gamut is short and low-chroma on purpose: hue says which
+   group of countries, VALUE and density say how much. */
+var LIME=[237,226,199], SOOT=[48,39,32];
+function mixc(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),
+  Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
+function cssc(c){return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
+function ladder(c){return [cssc(mixc(c,SOOT,0.46)),cssc(mixc(c,SOOT,0.24)),cssc(c),
+  cssc(mixc(c,LIME,0.13)),cssc(mixc(c,LIME,0.27))];}
+/* Gama corta y grave: tierras quemadas, ocre, umbra y un azul profundo.
+   No es la paleta de nadie en concreto: es lo que queda de la pintura
+   indigenista latinoamericana cuando se reduce a cinco pigmentos sobre cal. */
+var PIG={
+  mexico:            {col:[142, 59, 46],ang:-0.95,asp:1.35,lab:'México',sh:'México'},
+  central_caribbean: {col:[176,126, 52],ang: 0.05,asp:1.45,lab:'C. América y Caribe',sh:'C. América'},
+  andean:            {col:[104, 66, 44],ang: 1.30,asp:1.50,lab:'Países andinos',sh:'Andes'},
+  brazil:            {col:[ 40, 62, 88],ang: 0.52,asp:1.25,lab:'Brasil',sh:'Brasil'},
+  southern_cone:     {col:[ 92, 96, 76],ang:-0.35,asp:1.40,lab:'Cono Sur',sh:'Cono Sur'}
+};
+var PIG_ORDER=['mexico','central_caribbean','andean','brazil','southern_cone'];
+var PIG_ELSE={col:[120, 92, 66],ang:0.30,asp:1.4,lab:'Otros'};
+PIG_ORDER.forEach(function(k){PIG[k].t=ladder(PIG[k].col);});
+PIG_ELSE.t=ladder(PIG_ELSE.col);
+var TIDX=[0,0,1,1,2,2,2,3,4];
+var SIN='rgba(181,80,47,';
 
-<script type="module" src="js/landing.js?v=20260522-mobile-ui18"></script>
+/* ---------- canvases ---------- */
+var cv=document.getElementById('fresco'), ctx=cv.getContext('2d');
+var hitCtx=document.createElement('canvas').getContext('2d');
+var ov=document.getElementById('over'), octx=ov.getContext('2d');
+var colEl=document.getElementById('col'), railEl=document.querySelector('.rail');
+var VW=0,VH=0,dpr=1,plot=null,keyBox=null,K=1,OX=0,OY=0,small=false;
+var DTOT=2400,DAB=3.4,painted=0,giornata=-1;
+var pacS=[],chartS=[],M=280,segs=[],NSEG=0,drawnSeg=0,coastDone=false;
+var mapBox=null,gratLayer=null,chartBase=0,keyLayer=null,ovDirty=null,namesDrawn=false,brushAt=0;
+var shadeLayer=null,railY=0,shadeBase=0,contoursDrawn=false;
+
+function P(c){return [OX+c[0]*K,OY+c[1]*K];}
+function cumLen(p){var c=[0];for(var j=1;j<p.length;j++){var dx=p[j][0]-p[j-1][0],dy=p[j][1]-p[j-1][1];
+  c[j]=c[j-1]+Math.sqrt(dx*dx+dy*dy);}return c;}
+function resample(p,n){var c=cumLen(p),Lx=c[c.length-1],out=[],j=0;
+  if(!Lx)return p.slice(0,n);
+  for(var w=0;w<n;w++){var s=Lx*w/(n-1);
+    while(j<c.length-2&&c[j+1]<s)j++;
+    var sg=c[j+1]-c[j],u=sg>0?(s-c[j])/sg:0;
+    out.push([p[j][0]+(p[j+1][0]-p[j][0])*u,p[j][1]+(p[j+1][1]-p[j][1])*u]);}
+  return out;}
+
+function layout(){
+  VW=window.innerWidth;VH=window.innerHeight;
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  [cv,ov].forEach(function(c){c.width=Math.round(VW*dpr);c.height=Math.round(VH*dpr);
+    c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);});
+  small=VW<900;
+  var railTop=railEl?railEl.getBoundingClientRect().top:VH-56;
+  railY=railTop;
+  var colBox=colEl.getBoundingClientRect();
+  var keyH=small?86:62;
+
+  if(!small){
+    /* the picture takes everything the column does not need and fills it */
+    var px=Math.round(colBox.right+26);
+    plot={x:px,y:24,w:Math.round(VW-px-30),h:Math.round(railTop-24-14-keyH)};
+  }else{
+    var top=Math.max(colBox.bottom+10,VH*0.30);
+    plot={x:8,y:Math.round(top),w:VW-16,h:Math.round(railTop-top-10-keyH)};
+    if(plot.h<210){plot.h=210;plot.y=Math.max(0,Math.round(railTop-10-keyH-210));}
+  }
+  var bw=bb[2]-bb[0],bh=bb[3]-bb[1];
+  K=Math.min(plot.w/bw,plot.h/bh)*0.985;
+  OX=plot.x+(plot.w-bw*K)/2-bb[0]*K;
+  OY=plot.y+(plot.h-bh*K)/2-bb[1]*K;
+  /* where the drawn continent actually lands, so the key can sit under it */
+  mapBox={x:OX+bb[0]*K,y:OY+bb[1]*K,w:bw*K,h:bh*K};
+  keyBox={x:mapBox.x,y:plot.y+plot.h+10,w:mapBox.w,h:keyH};
+  /* la serie ya no es un recuadro en medio del mapa: es la sombra de lo que
+     crece, grande, subiendo desde abajo y difuminada por detrás de todo */
+  shadeBase=keyBox.y-8;
+  keyLayer=null;ovDirty=null;contoursDrawn=false;finalLayer=null;hoverG=null;
+  DAB=small?3.4:4.4;
+  DTOT=small?1700:3100;
+  M=small?190:250;
+
+  /* the Brazilian shore, and the same number of points of the series */
+  pacS=coastP?resample(coastP.map(P),M):[];
+  /* the growth curve, drawn big enough to hold the wall on its own */
+  var gx0=plot.x+plot.w*(small?0.10:0.11),gx1=plot.x+plot.w*(small?0.80:0.87),
+      gy0=plot.y+plot.h*0.985+(small?keyH*0.60:0),gy1=plot.y+plot.h*0.13;
+  chartBase=gx0;
+  chartS=[];
+  for(var w=0;w<M;w++){
+    var t=w/(M-1),si=Math.min(NSER-1,Math.round(t*(NSER-1)));
+    var nv=Math.pow(SER[si]/serMax,0.86);
+    chartS.push([gx0+nv*(gx1-gx0),gy0+t*(gy1-gy0)]);
+  }
+
+  /* every drawn boundary, once - the sinopia of the whole continent */
+  segs=[];
+  arcsP.forEach(function(a){var pts=a.map(P);
+    for(var j=1;j<pts.length;j++)segs.push([pts[j-1],pts[j]]);});
+  NSEG=segs.length;
+
+  geomsP.forEach(function(g){
+    var path=new Path2D();
+    g.rings.forEach(function(poly){poly.forEach(function(r){
+      for(var j=0;j<r.length;j++){var p=P(r[j]);
+        if(j===0)path.moveTo(p[0],p[1]);else path.lineTo(p[0],p[1]);}
+      path.closePath();});});
+    g.path=path;
+    var b=[Infinity,Infinity,-Infinity,-Infinity];
+    g.rings.forEach(function(poly){poly.forEach(function(r){r.forEach(function(c){var p=P(c);
+      if(p[0]<b[0])b[0]=p[0];if(p[1]<b[1])b[1]=p[1];
+      if(p[0]>b[2])b[2]=p[0];if(p[1]>b[3])b[3]=p[1];});});});
+    g.bbox=b;
+    g.pg=PIG[g.region]||PIG_ELSE;
+    g.ang=g.pg.ang+(hash(g.iso.charCodeAt(0)*31,g.iso.charCodeAt(2))-0.5)*0.55;
+    g.quota=totalEnd>0?Math.max(2,Math.round(DTOT*g.end/totalEnd)):2;
+    g.pool=[];
+    var tries=0,need=g.quota,rand=rng(g.iso.charCodeAt(0)*7919+g.iso.charCodeAt(1)*131+g.iso.charCodeAt(2));
+    while(g.pool.length<need&&tries<need*30+400){tries++;
+      var x=b[0]+rand()*(b[2]-b[0]),y=b[1]+rand()*(b[3]-b[1]);
+      if(hitCtx.isPointInPath(g.path,x,y))g.pool.push([x,y]);}
+    var sh=rng(g.iso.charCodeAt(1)*2654435761);
+    for(var z=g.pool.length-1;z>0;z--){var wz=Math.floor(sh()*(z+1)),tmp=g.pool[z];g.pool[z]=g.pool[wz];g.pool[wz]=tmp;}
+    if(!g.pool.length)g.pool.push([(b[0]+b[2])/2,(b[1]+b[3])/2]);
+    g.quota=g.pool.length;g.done=0;
+  });
+
+  buildGraticule();
+  buildShade();
+  buildKey();
+  painted=0;giornata=-1;drawnSeg=0;coastDone=false;namesDrawn=false;brushAt=0;
+  geomsP.forEach(function(g){g.done=0;});
+  ctx.clearRect(0,0,VW,VH);octx.clearRect(0,0,VW,VH);
+}
+
+/* ---------- the graticule: the whole wall is a charted wall ---------- */
+function buildGraticule(){
+  if(!gratLayer)gratLayer=document.createElement('canvas');
+  gratLayer.width=cv.width;gratLayer.height=cv.height;
+  var g=gratLayer.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.lineJoin='round';g.lineCap='round';
+  var lon,lat,first,p;
+  g.strokeStyle='rgba(181,80,47,.26)';g.lineWidth=1.0;
+  for(lon=-165;lon<=15;lon+=15){
+    g.beginPath();first=true;
+    for(lat=-80;lat<=55;lat+=2){p=P(proj(lon,lat));
+      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();
+  }
+  for(lat=-75;lat<=50;lat+=15){
+    g.beginPath();first=true;
+    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,lat));
+      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();
+  }
+  /* the equator and the two tropics carry a little more ink, as on a wall map */
+  g.strokeStyle='rgba(181,80,47,.44)';g.lineWidth=1.3;
+  [-23.44,0,23.44].forEach(function(la){
+    g.beginPath();first=true;
+    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,la));
+      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();});
+  /* the two oceans, lettered into the plaster */
+  g.font='700 '+(small?9:12)+'px Archivo, Arial, sans-serif';
+  g.fillStyle='rgba(126,107,87,.55)';
+  g.textAlign='center';g.textBaseline='middle';
+  [[-114,-45,'O C É A N O   P A C Í F I C O'],
+   [-20,-30,'O C É A N O   A T L Á N T I C O']].forEach(function(o){
+    var q2=P(proj(o[0],o[1])),tw=g.measureText(o[2]).width/2;
+    if(q2[0]-tw>6&&q2[0]+tw<VW-6&&q2[1]>20&&q2[1]<VH-20)g.fillText(o[2],q2[0],q2[1]);
+  });
+}
+
+/* ---------- la sombra de lo que crece ----------
+   La producción agraria de la región, 1900-2023, ya no es un gráfico
+   incrustado: es una masa grande que sube desde el pie del muro, difuminada,
+   por detrás del mapa. Se lee como una sombra, no como una figura, y lleva
+   una sola línea de texto para que se sepa de qué es sombra. */
+function buildShade(){
+  if(!shadeLayer)shadeLayer=document.createElement('canvas');
+  shadeLayer.width=cv.width;shadeLayer.height=cv.height;
+  var g=shadeLayer.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  var x0=small?-10:plot.x-52, x1=VW+10, yb=shadeBase, yt=plot.y+plot.h*0.14;
+  if(yb-yt<60)yt=yb-60;
+  var j,pts=[];
+  for(j=0;j<NSER;j++){
+    var t=j/(NSER-1), nv=SER[j]/serMax;
+    pts.push([x0+t*(x1-x0), yb-nv*(yb-yt)]);
+  }
+  g.save();
+  g.beginPath();g.rect(x0,yt-40,x1-x0,yb-yt+46);g.clip();
+  var soft=false;
+  try{g.filter='blur('+(small?9:15)+'px)';soft=(g.filter!=='none');}catch(e){}
+  var grad=g.createLinearGradient(0,yt,0,yb);
+  grad.addColorStop(0,'rgba(158,66,44,0.10)');
+  grad.addColorStop(0.45,'rgba(128,80,48,0.22)');
+  grad.addColorStop(1,'rgba(92,62,40,0.40)');
+  function area(off,al){
+    g.globalAlpha=al;
+    g.beginPath();g.moveTo(pts[0][0],yb+30);
+    for(j=0;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]+off);
+    g.lineTo(pts[pts.length-1][0],yb+30);g.closePath();
+    g.fillStyle=grad;g.fill();
+  }
+  /* si el navegador no da desenfoque, se consigue con pasadas desplazadas */
+  if(soft){area(0,1);area(0,0.55);}
+  else{area(-9,0.40);area(0,0.50);area(9,0.40);}
+  try{g.filter='none';}catch(e){}
+  g.restore();
+  /* la única letra que lleva la sombra */
+  g.globalAlpha=1;
+  g.font='700 '+(small?8.5:10.5)+'px Archivo, Arial, sans-serif';
+  g.fillStyle='rgba(112,92,72,.80)';
+  g.textAlign='left';g.textBaseline='bottom';
+  g.fillText(small?'SOMBRA: PRODUCCIÓN AGRARIA · × 32'
+                  :'SOMBRA: PRODUCCIÓN AGRARIA DE LA REGIÓN, 1900 → 2023 · × 32',
+             (x0<0?9:x0+6),yb-4);
+}
+function blitShade(x,y,w,h){
+  if(!shadeLayer)return;
+  x=Math.max(0,x);y=Math.max(0,y);
+  w=Math.min(w,VW-x);h=Math.min(h,VH-y);
+  if(w<=0||h<=0)return;
+  ctx.drawImage(shadeLayer,x*dpr,y*dpr,w*dpr,h*dpr,x,y,w,h);
+}
+/* ---------- el contorno negro, encima del color ----------
+   Lo que sostiene la imagen no es el color sino la línea: contorno grueso,
+   de peso desigual, cerrado sobre cada país. Va después de la pintura. */
+function drawContours(c){
+  c.save();c.lineJoin='round';c.lineCap='round';
+  geomsP.forEach(function(g){
+    c.strokeStyle='rgba(22,17,14,0.30)';
+    c.lineWidth=small?3.2:4.6;
+    c.stroke(g.path);
+    c.strokeStyle='rgba(19,15,13,0.90)';
+    c.lineWidth=small?1.5:2.3;
+    c.stroke(g.path);
+  });
+  c.restore();
+}
+
+/* blit only the band of graticule that is actually being repainted */
+function blitGrat(x,y,w,h){
+  if(!gratLayer)return;
+  x=Math.max(0,x);y=Math.max(0,y);
+  w=Math.min(w,VW-x);h=Math.min(h,VH-y);
+  if(w<=0||h<=0)return;
+  ctx.drawImage(gratLayer,x*dpr,y*dpr,w*dpr,h*dpr,x,y,w,h);
+}
+/* ---------- the fold: the curve becomes the shore ---------- */
+function foldPts(u){
+  var e=ease(clamp01(u)),out=[],w;
+  for(w=0;w<M;w++){
+    /* the head of the line lands first, so the shore sets from the south up */
+    var local=clamp01((e-0.22*(1-w/(M-1)))/0.78);
+    var a=chartS[w],b=pacS[w]||chartS[w];
+    out.push([a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local]);
+  }
+  return out;
+}
+/* While the curve is still a curve it must read as one: a time axis up the
+   side, a baseline and four dates, all fading out as the shore takes over. */
+/* the area the curve encloses, washed in like a first coat of colour */
+function chartWash(grow,alpha){
+  if(alpha<=0||!chartS.length)return;
+  var n=Math.max(2,Math.round(M*grow)),j;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.fillStyle='rgba(181,80,47,.17)';
+  ctx.beginPath();ctx.moveTo(chartBase,chartS[0][1]);
+  for(j=0;j<n;j++)ctx.lineTo(chartS[j][0],chartS[j][1]);
+  ctx.lineTo(chartBase,chartS[n-1][1]);ctx.closePath();ctx.fill();
+  /* brush hatching, so the wash reads as pigment and not as a flat tint.
+     Each stroke runs from the baseline to the curve, so it is inside the
+     area by construction and no clip path is needed for it. */
+  ctx.strokeStyle='rgba(154,43,43,.18)';ctx.lineWidth=1.2;ctx.lineCap='round';
+  ctx.beginPath();
+  for(j=0;j<n;j+=9){
+    var yy=chartS[j][1];
+    ctx.moveTo(chartBase+2,yy);ctx.lineTo(chartS[j][0]-1.5,yy+2.5);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+function chartFrame(alpha){
+  if(alpha<=0||!chartS.length)return;
+  var x0=chartS[0][0],yBot=chartS[0][1],yTop=chartS[M-1][1];
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.strokeStyle='rgba(126,107,87,.62)';ctx.lineWidth=1.1;
+  ctx.beginPath();ctx.moveTo(chartBase,yTop-8);ctx.lineTo(chartBase,yBot+8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(chartBase,yBot+8);ctx.lineTo(chartS[M-1][0]+10,yBot+8);ctx.stroke();
+  ctx.font='700 '+(small?9:12)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(126,107,87,.95)';ctx.textBaseline='middle';ctx.textAlign='right';
+  [1900,1950,2000,2023].forEach(function(y){
+    var t=(y-Y0)/(Y1-Y0),yy=yBot+(yTop-yBot)*t;
+    ctx.beginPath();ctx.moveTo(chartBase,yy);ctx.lineTo(chartBase+6,yy);ctx.stroke();
+    ctx.fillText(y,chartBase-5,yy);
+  });
+  /* Antes de plegarse, la curva dice de qué es. El rótulo va en el hueco
+     que la propia serie deja libre — abajo a la derecha, donde no puede
+     tocarla — y lleva unidad, cobertura, extremos y titular. */
+  ctx.textBaseline='middle';
+  ctx.font='700 '+(small?9.5:12)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(84,68,58,.95)';
+  ctx.textAlign='left';
+  ctx.fillText('56 Mt',chartS[0][0]+9,yBot-2);
+  ctx.font='700 '+(small?11:15)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(154,43,43,.95)';
+  ctx.fillText('1.781 Mt',chartS[M-1][0]+11,yTop+1);
+  var hx=plot.x+plot.w*(small?0.34:0.36), hy=plot.y+plot.h*0.50;
+  ctx.textBaseline='alphabetic';
+  ctx.font='700 '+(small?13:19)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(35,26,21,.94)';
+  ctx.fillText('PRODUCCIÓN AGRARIA',hx,hy);
+  ctx.fillText('DE AMÉRICA LATINA',hx,hy+(small?16:23));
+  ctx.font='400 '+(small?10:12.5)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(110,92,72,.95)';
+  ctx.fillText('millones de toneladas · 21 países',hx,hy+(small?34:48));
+  ctx.font='700 '+(small?20:34)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(154,43,43,.92)';
+  ctx.fillText('× 32 en un siglo',hx,hy+(small?66:96));
+  ctx.font='400 '+(small?10:12.5)+'px Archivo, Arial, sans-serif';
+  ctx.fillStyle='rgba(110,92,72,.95)';
+  ctx.fillText('de 1900 a 2023',hx,hy+(small?84:120));
+  ctx.restore();
+}
+function strokeSinopiaLine(pts,upto,wobble,single){
+  var n=Math.max(2,Math.min(pts.length,upto));
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(var pass=single?1:0;pass<2;pass++){
+    ctx.strokeStyle=SIN+(pass?0.30:0.58)+')';
+    ctx.lineWidth=pass?3.2:1.6;
+    ctx.beginPath();
+    for(var j=0;j<n;j++){
+      var d=wobble?fbm(j*0.5,pass+2)*1.4:0;
+      var x=pts[j][0]+d,y=pts[j][1]-d*0.7;
+      if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+var SEG_BUDGET=700;
+function sinopiaTo(n){
+  if(n<=drawnSeg)return;
+  if(n>drawnSeg+SEG_BUDGET)n=drawnSeg+SEG_BUDGET;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(var i=drawnSeg;i<n&&i<NSEG;i++){
+    var s=segs[i],w=1.0+hash(i,1)*1.7,a=0.26+hash(i,2)*0.40;
+    var jx=(hash(i,3)-0.5)*1.5,jy=(hash(i,4)-0.5)*1.5;
+    ctx.strokeStyle=SIN+a.toFixed(2)+')';ctx.lineWidth=w;
+    ctx.beginPath();ctx.moveTo(s[0][0]+jx,s[0][1]+jy);
+    ctx.lineTo(s[1][0]+jx*0.6,s[1][1]+jy*0.6);ctx.stroke();
+  }
+  ctx.restore();
+  drawnSeg=Math.min(n,NSEG);
+}
+
+/* ---------- the colour, one brush load at a time ---------- */
+/* ---------- una carga de pincel ----------
+   No es una elipse. Una elipse se lee como una hoja, y en este muro no hay
+   hojas. Lo que baja al muro es un PLANO: de cuatro a seis lados, ninguno
+   igual, cortados en ángulo, con un borde donde el pigmento se acumuló al
+   levantar el pincel. Puestos uno junto a otro, estos planos quiebran el
+   país en facetas en vez de cubrirlo de pétalos. */
+function dabAt(c,pg,ang,x,y,k,salt){
+  var r1=hash(k,salt*11+3),r2=hash(k+91,salt+7),r3=hash(k+17,salt*3+5),r4=hash(k+53,salt*5+1);
+  var R=DAB*(0.78+r2*0.90),asp=pg.asp,a0=ang+(r1-0.5)*0.55;
+  var ca=Math.cos(a0),sa=Math.sin(a0);
+  var n=4+((r4*2.99)|0),q,px,py,th,rr,xs=[],ys=[];
+  for(q=0;q<n;q++){
+    th=(q/n)*6.2832+(hash(k*3+q,salt)-0.5)*0.78;
+    rr=R*(0.56+hash(k*7+q,salt+3)*0.86);
+    px=Math.cos(th)*rr*asp;py=Math.sin(th)*rr*0.78;
+    xs.push(x+px*ca-py*sa);ys.push(y+px*sa+py*ca);
+  }
+  c.globalAlpha=0.32+r1*0.30;
+  c.fillStyle=pg.t[TIDX[(r3*9)|0]];
+  c.beginPath();c.moveTo(xs[0],ys[0]);
+  for(q=1;q<n;q++)c.lineTo(xs[q],ys[q]);
+  c.closePath();c.fill();
+  /* el borde por donde se fue la carga */
+  if(r4>0.42){
+    var e=(r3*n)|0;
+    c.globalAlpha=0.26+r2*0.30;
+    c.strokeStyle=cssc(mixc(pg.col,SOOT,0.66));
+    c.lineWidth=0.7+r1*1.0;
+    c.beginPath();c.moveTo(xs[e],ys[e]);c.lineTo(xs[(e+1)%n],ys[(e+1)%n]);
+    c.lineTo(xs[(e+2)%n],ys[(e+2)%n]);c.stroke();
+  }
+}
+function paintTo(frac){
+  var target=clamp01(frac),year=Y0+Math.round((Y1-Y0)*target),yi=year-Y0;
+  if(yi<0)yi=0;if(yi>NSER-1)yi=NSER-1;
+  /* Clipping to a country outline is the expensive part of a brush load, so
+     each frame takes only a few countries, picked round-robin. The paint is
+     cumulative on the wall, so over the phase every country gets its turn. */
+  var budget=380,clips=0,NG=geomsP.length,c2;
+  for(c2=0;c2<NG;c2++){
+    var i=(brushAt+c2)%NG,g=geomsP[i];
+    if(!g.s||!g.end)continue;
+    var want=Math.round(g.quota*(g.s[yi]/g.end));
+    if(want>g.quota)want=g.quota;
+    if(g.done>=want)continue;
+    ctx.save();ctx.clip(g.path);
+    while(g.done<want&&budget>0){var p=g.pool[g.done];
+      if(p)dabAt(ctx,g.pg,g.ang,p[0],p[1],g.done,g.iso.length);
+      g.done++;painted++;budget--;}
+    ctx.restore();
+    clips++;
+    if(budget<=0||clips>=5){brushAt=(i+1)%NG;break;}
+  }
+  if(c2>=NG)brushAt=0;
+  var dec=Math.floor(yi/10);
+  if(dec>giornata){
+    giornata=dec;
+    if(dec%2===0){
+      var yy=plot.y+plot.h*(0.06+0.075*(dec%12));
+      ctx.save();ctx.strokeStyle='rgba(120,98,66,.10)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(plot.x+6,yy+Math.sin(dec)*5);
+      ctx.lineTo(plot.x+plot.w-6,yy-Math.sin(dec*1.7)*6);ctx.stroke();ctx.restore();
+    }
+  }
+  ctx.globalAlpha=1;
+  return year;
+}
+
+/* ---------- the key, directly under the map it explains ---------- */
+function paintKey(c){
+  var x=keyBox.x,y=keyBox.y,w=keyBox.w;
+  c.strokeStyle='rgba(35,26,21,.30)';c.lineWidth=1;
+  c.beginPath();c.moveTo(x,y+.5);c.lineTo(x+w,y+.5);c.stroke();
+  var n=PIG_ORDER.length,i;
+  /* the key reflows: five across on a wall, three across on a phone */
+  var cols=small?3:n,rows=Math.ceil(n/cols),cw=w/cols,rh=small?34:0;
+  var sw=cw-(small?10:18),sh=small?11:15;
+  var key=function(k){return small?PIG[PIG_ORDER[k]].sh:PIG[PIG_ORDER[k]].lab;};
+  var fs=small?9.5:11.5;
+  function widest(){var m=0;for(var q2=0;q2<n;q2++)m=Math.max(m,c.measureText(key(q2)).width);return m;}
+  c.font='700 '+fs+'px Archivo, Arial, sans-serif';
+  while(fs>8&&widest()>cw-8){fs-=0.5;c.font='700 '+fs+'px Archivo, Arial, sans-serif';}
+  c.textBaseline='top';c.textAlign='left';
+  for(i=0;i<n;i++){
+    var pg=PIG[PIG_ORDER[i]],col=i%cols,row=(i/cols)|0;
+    var cx=x+cw*col,sy=y+(small?8:11)+row*rh;
+    /* La muestra se pinta con el mismo pincel que cubre el muro, pero
+       apretada: planos superpuestos que forman una mancha continua, con
+       su contorno negro. Nada suelto que pueda leerse como una hoja. */
+    c.save();
+    c.beginPath();c.rect(cx,sy,sw*0.78,sh);c.clip();
+    for(var d=0;d<30;d++){
+      dabAt(c,pg,pg.ang,cx+sw*0.78*(0.02+0.96*hash(d*7+i,3)),
+            sy+sh*(0.05+0.90*hash(d*3+i,9)),d+i*13,i+2);
+    }
+    c.restore();
+    c.globalAlpha=1;
+    c.strokeStyle='rgba(19,15,13,0.85)';c.lineWidth=1.6;
+    c.strokeRect(cx+0.8,sy+0.8,sw*0.78-1.6,sh-1.6);
+    c.font='700 '+fs+'px Archivo, Arial, sans-serif';
+    c.fillStyle='rgba(35,26,21,.92)';
+    c.fillText(key(i),cx,sy+sh+4);
+  }
+  var noteY=small?(y+8+rows*rh+6):(y+54);
+  c.font='400 '+(small?9:11.5)+'px Archivo, Arial, sans-serif';
+  c.fillStyle='rgba(84,68,58,.95)';
+  c.textAlign='left';c.textBaseline='alphabetic';
+  c.fillText(small?'Cada mancha = una cantidad fija de producto'
+                  :'Cada mancha es una cantidad fija de producto: la densidad de pintura de cada país es su producción agraria',
+             x,noteY);
+}
+/* the key never changes, so it is painted once and blitted after that */
+function buildKey(){
+  if(!keyBox)return;
+  keyLayer=document.createElement('canvas');
+  keyLayer.width=cv.width;keyLayer.height=cv.height;
+  var g=keyLayer.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  paintKey(g);
+}
+function drawKey(c,alpha){
+  if(alpha<=0||!keyLayer)return;
+  c.save();c.globalAlpha=alpha;c.drawImage(keyLayer,0,0,VW,VH);c.restore();
+}
+
+/* the six biggest producers, lettered into the wall once the paint is on */
+function drawNames(c){
+  c.save();
+  c.font='700 '+(small?10:12)+'px Archivo, Arial, sans-serif';
+  c.textAlign='center';c.textBaseline='middle';
+  geomsP.slice().sort(function(a,b){return b.end-a.end;}).slice(0,small?4:6).forEach(function(g){
+    var cx=(g.bbox[0]+g.bbox[2])/2,cy=(g.bbox[1]+g.bbox[3])/2;
+    if(g.iso==='CHL')cx=g.bbox[0]-22;
+    if(g.iso==='MEX')cy=g.bbox[1]+(g.bbox[3]-g.bbox[1])*0.62;
+    var txt=g.name.toUpperCase(),w=c.measureText(txt).width;
+    c.fillStyle='rgba(240,231,208,.90)';
+    c.fillRect(cx-w/2-5,cy-9,w+10,18);
+    c.fillStyle='rgba(35,26,21,.96)';
+    c.fillText(txt,cx,cy);
+  });
+  c.restore();
+}
+
+/* ---------- overlay: the year, the caption, the biggest names ---------- */
+function overlay(year,caption){
+  if(!ovDirty)octx.clearRect(0,0,VW,VH);
+  else octx.clearRect(ovDirty[0],ovDirty[1],ovDirty[2],ovDirty[3]);
+  ovDirty=[plot.x-4,plot.y-4,plot.w+8,(small?40:62)];
+  octx.save();
+  octx.textAlign='right';octx.textBaseline='top';
+  octx.font='700 '+(small?26:44)+'px Archivo, Arial, sans-serif';
+  octx.fillStyle='rgba(154,43,43,.85)';
+  octx.fillText(year,plot.x+plot.w-4,plot.y+2);
+  if(caption){
+    octx.font='600 '+(small?10:12.5)+'px Archivo, Arial, sans-serif';
+    octx.textAlign='left';octx.textBaseline='bottom';
+    var cy=plot.y+(small?16:20),cw=octx.measureText(caption).width,ch=small?13:16;
+    octx.fillStyle='rgba(237,226,199,.80)';
+    octx.fillRect(plot.x+2,cy-ch,cw+9,ch+4);
+    octx.fillStyle='rgba(110,92,72,.98)';
+    octx.fillText(caption,plot.x+6,cy);
+  }
+  octx.restore();
+}
+
+/* ------------------------------------------------------------------
+   Terminado el fresco, el muro responde. Al pasar el cursor por encima
+   (o al tocar, con 44 px de alcance y la ficha anclada), el país que hay
+   debajo se enciende, el resto del muro se apaga y una ficha dice qué es
+   y cuánto produce. Al salir, todo vuelve. Ni durante el acto, ni encima
+   de los enlaces, ni una herramienta: un guiño.
+   ------------------------------------------------------------------ */
+var finalLayer=null,hoverG=null,COARSE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+window.__hoverInfo=null;
+function snapshotFinal(){
+  if(!finalLayer)finalLayer=document.createElement('canvas');
+  if(finalLayer.width!==cv.width||finalLayer.height!==cv.height){
+    finalLayer.width=cv.width;finalLayer.height=cv.height;}
+  var g=finalLayer.getContext('2d');
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,finalLayer.width,finalLayer.height);
+  g.drawImage(cv,0,0);
+}
+function miles(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function pickCountry(x,y){
+  if(!finished||!finalLayer)return null;
+  var i,g;
+  for(i=0;i<geomsP.length;i++){g=geomsP[i];
+    if(g.end&&hitCtx.isPointInPath(g.path,x,y))return g;}
+  if(!COARSE)return null;
+  /* con el dedo, 44 px de alcance hasta el país más próximo */
+  var best=null,bd=44;
+  for(i=0;i<geomsP.length;i++){g=geomsP[i];if(!g.end)continue;
+    var b=g.bbox,dx=x<b[0]?b[0]-x:(x>b[2]?x-b[2]:0),dy=y<b[1]?b[1]-y:(y>b[3]?y-b[3]:0);
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(d<bd){bd=d;best=g;}}
+  return best;
+}
+function hoverCard(g,mx,my){
+  var pg=g.pg,pad=11,fs=small?11:12.5;
+  var L1=g.name.toUpperCase();
+  var L2=(pg.lab===g.name)?'':pg.lab;
+  var L3=miles(g.end/1e6)+' Mt en 2023';
+  var L4=Math.round(g.end/totalEnd*1000)/10+'% de la región';
+  var g0=g.s&&g.s[0]>0?g.end/g.s[0]:0;
+  var L5=g0>1.5?('× '+Math.round(g0)+' desde 1900'):'';
+  window.__hoverInfo={iso:g.iso,name:g.name,group:pg.lab,
+    mt:Math.round(g.end/1e6),share:Math.round(g.end/totalEnd*1000)/10};
+  octx.save();
+  octx.font='700 '+(fs+1.5)+'px Archivo, Arial, sans-serif';
+  var w=octx.measureText(L1).width;
+  octx.font='400 '+fs+'px Archivo, Arial, sans-serif';
+  [L2,L3,L4,L5].forEach(function(t){if(t)w=Math.max(w,octx.measureText(t).width);});
+  var lines=2+(L2?1:0)+(L4?1:0)+(L5?1:0);
+  var bw=w+pad*2,bh=pad*2+(fs+2)+6+fs*1.45*(lines-1);
+  var bx,by;
+  if(COARSE){bx=plot.x+6;by=plot.y+6;}
+  else{
+    bx=mx+16;by=my-bh-14;
+    if(bx+bw>VW-10)bx=mx-bw-16;
+    if(bx<6)bx=6;
+    if(by<6)by=my+20;
+    if(by+bh>railY-8)by=Math.max(6,railY-8-bh);
+  }
+  octx.fillStyle='rgba(240,232,212,0.95)';octx.fillRect(bx,by,bw,bh);
+  octx.strokeStyle='rgba(19,15,13,0.92)';octx.lineWidth=2;
+  octx.strokeRect(bx+1,by+1,bw-2,bh-2);
+  octx.textAlign='left';octx.textBaseline='top';
+  octx.font='700 '+(fs+1.5)+'px Archivo, Arial, sans-serif';
+  octx.fillStyle='rgba(24,18,15,0.98)';octx.fillText(L1,bx+pad,by+pad);
+  var ly=by+pad+fs+8;
+  if(L2){octx.font='700 '+fs+'px Archivo, Arial, sans-serif';
+    octx.fillStyle=cssc(mixc(pg.col,SOOT,0.20));octx.fillText(L2,bx+pad,ly);ly+=fs*1.45;}
+  octx.font='400 '+fs+'px Archivo, Arial, sans-serif';
+  octx.fillStyle='rgba(45,35,28,0.95)';octx.fillText(L3,bx+pad,ly);ly+=fs*1.45;
+  if(L4){octx.fillStyle='rgba(90,74,60,0.95)';octx.fillText(L4,bx+pad,ly);ly+=fs*1.45;}
+  if(L5){octx.fillStyle='rgba(154,43,43,0.95)';octx.fillText(L5,bx+pad,ly);}
+  octx.restore();
+}
+function drawHover(g,mx,my){
+  if(!finished||!finalLayer)return;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.globalAlpha=1;
+  ctx.clearRect(0,0,VW,VH);
+  ctx.drawImage(finalLayer,0,0,VW,VH);
+  octx.clearRect(0,0,VW,VH);ovDirty=null;
+  if(!g){window.__hoverInfo=null;overlay(Y1,CAP_C);return;}
+  /* con una ficha abierta el rótulo del muro sobra */
+  /* el muro se apaga */
+  ctx.fillStyle='rgba(237,226,199,0.66)';ctx.fillRect(0,0,VW,VH);
+  /* menos el país que se mira */
+  ctx.save();ctx.clip(g.path);ctx.drawImage(finalLayer,0,0,VW,VH);ctx.restore();
+  ctx.save();ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(19,15,13,0.95)';ctx.lineWidth=small?2.4:3.4;ctx.stroke(g.path);
+  ctx.restore();
+  overlay(Y1,'');
+  hoverCard(g,mx,my);
+}
+var hovRaf=0,pX=0,pY=0,pHas=false;
+function schedule(){
+  if(hovRaf)return;
+  hovRaf=requestAnimationFrame(function(){
+    hovRaf=0;
+    var g=pHas?pickCountry(pX,pY):null;
+    if(g===hoverG&&!(g&&!COARSE))return;
+    hoverG=g;drawHover(g,pX,pY);
+  });
+}
+function onPoint(e){
+  if(!finished)return;
+  /* el texto y el rail no son muro: sobre ellos no se enciende nada */
+  if(e.target&&e.target.closest&&e.target.closest('a,button,.col,.rail')){
+    if(pHas){pHas=false;hoverG=undefined;schedule();}return;}
+  pHas=true;pX=e.clientX;pY=e.clientY;schedule();
+}
+function clearHover(){if(!finished||!pHas)return;pHas=false;hoverG=undefined;schedule();}
+
+/* ---------- run ---------- */
+var t0=0,finished=false,raf=0,frames=0,fpsT=0;
+var CAP_A='',
+    CAP_B='…y ese perfil es la costa atlántica de Brasil',
+    CAP_C='El muro se cubre al ritmo al que crece la producción';
+
+function finish(){
+  if(finished)return;
+  finished=true;
+  ctx.clearRect(0,0,VW,VH);
+  drawnSeg=0;painted=0;giornata=-1;contoursDrawn=false;
+  geomsP.forEach(function(g){g.done=0;});
+  ctx.drawImage(gratLayer,0,0,VW,VH);
+  ctx.drawImage(shadeLayer,0,0,VW,VH);
+  if(pacS.length)strokeSinopiaLine(pacS,M,true);
+  while(drawnSeg<NSEG)sinopiaTo(NSEG);
+  for(var pf=0;pf<200;pf++)paintTo(1);
+  drawContours(ctx);contoursDrawn=true;
+  drawNames(ctx);namesDrawn=true;
+  drawKey(ctx,1);
+  ovDirty=null;
+  overlay(Y1,CAP_C);
+  body.classList.add('done');
+  if(raf){cancelAnimationFrame(raf);raf=0;}
+  snapshotFinal();
+}
+
+function tick(ts){
+  if(!t0){t0=ts;fpsT=ts;}
+  frames++;
+  if(ts-fpsT>=500){window.__fps=Math.round(frames*1000/(ts-fpsT));frames=0;fpsT=ts;}
+  var el=(ts-t0)/1000;
+  if(el<FOLD_END){
+    /* the curve, then the fold - repainted each frame, but only over the
+       band of wall the curve can reach */
+    ctx.clearRect(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);
+    var u=el<CHART_END?0:(el-CHART_END)/(FOLD_END-CHART_END);
+    var grow=el<CHART_END?clamp01(el/CHART_END):1;
+    /* the graticule comes up under the curve as it folds into a map */
+    if(u>0){ctx.save();ctx.globalAlpha=clamp01((u-0.25)/0.55);
+      blitGrat(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);
+      /* la sombra sube desde el pie del muro mientras la curva se pliega */
+      blitShade(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);ctx.restore();}
+    var pts=foldPts(u);
+    chartWash(grow,clamp01(el/0.35)*(1-clamp01(u/0.30)));
+    chartFrame(clamp01(el/0.4)*(1-clamp01(u/0.42)));
+    strokeSinopiaLine(pts,Math.max(2,Math.round(M*grow)),u>0.85,true);
+    var yr=Y0+Math.round((Y1-Y0)*(el<CHART_END?grow:1));
+    overlay(yr,u<0.5?CAP_A:CAP_B);
+  }else if(el<DRAW_END){
+    if(!coastDone){ctx.clearRect(0,0,VW,VH);
+      ctx.drawImage(gratLayer,0,0,VW,VH);
+      ctx.drawImage(shadeLayer,0,0,VW,VH);
+      strokeSinopiaLine(pacS,M,true);coastDone=true;}
+    sinopiaTo(Math.round(NSEG*clamp01((el-FOLD_END)/(DRAW_END-FOLD_END))));
+    overlay(Y0,CAP_B);
+  }else{
+    sinopiaTo(NSEG);
+    var w=clamp01((el-DRAW_END)/(PAINT_END-DRAW_END));
+    var year=paintTo(Math.pow(w,0.76));
+    drawKey(ctx,clamp01((el-DRAW_END-0.25)/0.7));
+    if(w>0.80&&!contoursDrawn){contoursDrawn=true;drawContours(ctx);}
+    if(w>0.86&&!namesDrawn){namesDrawn=true;drawNames(ctx);}
+    overlay(year,CAP_C);
+  }
+  if(el>=END){finish();return;}
+  raf=requestAnimationFrame(tick);
+}
+
+function start(){
+  layout();
+  if(REDUCED){finish();return;}
+  t0=0;finished=false;
+  raf=requestAnimationFrame(tick);
+}
+/* Archivo Black changes the height of the text column, and the column decides
+   where the wall begins - so measure after the face has loaded, not before. */
+function boot(){
+  var done=false;
+  function go(){if(done)return;done=true;start();}
+  if(document.fonts&&document.fonts.ready){
+    document.fonts.ready.then(go);
+    setTimeout(go,600);
+  }else go();
+}
+var rt=0;
+window.addEventListener('resize',function(){clearTimeout(rt);
+  rt=setTimeout(function(){layout();finished=false;finish();},200);});
+document.addEventListener('pointerdown',function(e){
+  if(e.target&&e.target.closest&&e.target.closest('a,button'))return;
+  if(!finished){finish();return;}
+  onPoint(e);
+});
+document.addEventListener('pointermove',function(e){
+  if(e.pointerType==='touch')return;
+  onPoint(e);
+},{passive:true});
+/* levantar el dedo no es salir del muro: en táctil la ficha se queda */
+document.addEventListener('pointerleave',function(e){
+  if(e.pointerType==='touch')return;clearHover();});
+window.addEventListener('blur',clearHover);
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(finished&&hoverG){clearHover();return;}
+  finish();
+});
+window.addEventListener('touchmove',function(){if(!finished)finish();},{passive:true});
+boot();
+})();
+</script>
 </body>
 </html>
-
-
-
-

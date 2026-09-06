@@ -1,9 +1,9 @@
 /* trend-view.js - Multi-line time series chart with facet support */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { CAT_COLORS, REGIONS, fmt, fmtUnit, smartXTicks, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260522-mobile-ui18';
-import { showTooltip, hideTooltip } from '../components/tooltip.js';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { CAT_COLORS, REGIONS, fmt, fmtUnit, smartXTicks, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260906f';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
 
 let _svg, _width, _height;
 const MARGIN = { top: 34, right: 46, bottom: 42, left: 65 };

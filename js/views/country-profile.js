@@ -1,9 +1,9 @@
 /* country-profile.js - Country profile with crop history dashboard. */
 
-import State from '../state.js?v=20260522-mobile-ui18';
-import DataLoader from '../data-loader.js?v=20260522-mobile-ui18';
-import { COUNTRIES, fmt, fmtUnit, shortItemLabel, smartXTicks } from '../utils.js?v=20260522-mobile-ui18';
-import { showTooltip, hideTooltip } from '../components/tooltip.js';
+import State from '../state.js?v=20260906f';
+import DataLoader from '../data-loader.js?v=20260906f';
+import { COUNTRIES, fmt, fmtUnit, shortItemLabel, smartXTicks } from '../utils.js?v=20260906f';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
 
 let _root = null;
 let _token = 0;

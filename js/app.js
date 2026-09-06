@@ -1,17 +1,21 @@
 /* app.js - Main application controller for Atlas Agrario de América Latina */
 
-import State from './state.js?v=20260522-mobile-ui18';
-import DataLoader from './data-loader.js?v=20260522-mobile-ui18';
-import { COUNTRIES, REGIONS, CATEGORY_ICONS, VIEWS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from './utils.js?v=20260522-mobile-ui18';
-import { initMapView, updateMapView } from './views/map-view.js?v=20260522-mobile-ui18';
-import { initTrendView, updateTrendView } from './views/trend-view.js?v=20260522-mobile-ui18';
-import { initTreemapView, updateTreemapView } from './views/treemap-view.js?v=20260522-mobile-ui18';
-import { initRankingView, updateRankingView } from './views/ranking-view.js?v=20260522-mobile-ui18';
-import { initTableView, updateTableView } from './views/table-view.js?v=20260522-mobile-ui18';
-import { initBilateralView, updateBilateralView } from './views/bilateral-view.js?v=20260522-mobile-ui18';
-import { initCountryProfileView, updateCountryProfileView } from './views/country-profile.js?v=20260522-mobile-ui18';
-import { initTimeline, updateTimeline } from './components/timeline.js?v=20260522-mobile-ui18';
-import { initTooltip, showTooltip, hideTooltip } from './components/tooltip.js';
+import State from './state.js?v=20260906f';
+import DataLoader from './data-loader.js?v=20260906f';
+import { COUNTRIES, REGIONS, CATEGORY_ICONS, VIEWS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from './utils.js?v=20260906f';
+import { initMapView, updateMapView } from './views/map-view.js?v=20260906f';
+import { initTrendView, updateTrendView } from './views/trend-view.js?v=20260906f';
+import { initTreemapView, updateTreemapView } from './views/treemap-view.js?v=20260906f';
+import { initRankingView, updateRankingView } from './views/ranking-view.js?v=20260906f';
+import { initTableView, updateTableView } from './views/table-view.js?v=20260906f';
+import { initBilateralView, updateBilateralView } from './views/bilateral-view.js?v=20260906f';
+import { initCountryProfileView, updateCountryProfileView } from './views/country-profile.js?v=20260906f';
+import { initTimeline, updateTimeline } from './components/timeline.js?v=20260906f';
+import { initTooltip, showTooltip, hideTooltip } from './components/tooltip.js?v=20260906f';
+import ExportShare from './export-share.js?v=20260906f';
+
+/* The URL the reader arrived with, captured before anything can rewrite it. */
+const _initialHash = location.hash;
 
 const CATEGORY_ORDER = ['landuse', 'agriculture', 'livestock', 'trade', 'labor', 'footprints', 'socioeconomic'];
 
@@ -182,8 +186,11 @@ let _aboutCoverageLoaded = false;
     _buildRightPanel(meta);
     console.log('[INIT] UI built');
 
-    // Preload subnational data in background (so it's ready when user clicks Subnacional)
-    DataLoader.loadSubnational();
+    // Preload subnational data in background (so it's ready when user clicks Subnacional).
+    // Not on a phone: subnational.json + its topology are 4.3 MB, they were the single
+    // largest item in a mobile first view, and _onGeoLevelChange() already awaits the load
+    // the first time somebody actually taps "Subnacional".
+    if (!_isNarrowViewport()) DataLoader.loadSubnational();
 
     // Sync yearRange with loaded data - use effective range based on actual data availability
     _updateYearRangeFromData();
@@ -211,6 +218,8 @@ let _aboutCoverageLoaded = false;
         }
     });
     State.subscribe('geoLevel', _onGeoLevelChange);
+    State.subscribe('geoLevel', () => _updateMapCaption());
+    State.subscribe('currentYear', () => _updateMapCaption());
     State.subscribe('compareMode', () => {
         _buildRPOptions();
         updateTimeline();
@@ -270,6 +279,16 @@ let _aboutCoverageLoaded = false;
     // Download/export dialog
     document.getElementById('btn-csv').addEventListener('click', _downloadDataPackage);
 
+    // Permalink, PNG of the current panel and reset (export-share.js).
+    ExportShare.init({
+        sourceText: () => document.getElementById('footer-source')?.textContent || '',
+        titleText: () => {
+            const c = document.getElementById('category-label')?.textContent || '';
+            const i = document.getElementById('indicator-label')?.textContent || '';
+            return ['América Latina', c, i].filter(Boolean).join(' · ');
+        },
+    });
+
     // Fullscreen
     document.getElementById('btn-fs').addEventListener('click', _toggleFullscreen);
 
@@ -282,6 +301,12 @@ let _aboutCoverageLoaded = false;
 
     // Update year display
     document.getElementById('tl-year').textContent = State.get('currentYear');
+
+    // A link that carries state has to reproduce the view. Applied before the
+    // first render so nothing is drawn twice, and only then is the URL writer
+    // allowed to start (otherwise it would overwrite the incoming hash).
+    try { ExportShare.applyHash(_initialHash); } catch (e) { console.warn('permalink:', e); }
+    ExportShare.markReady();
 
     // Mark init done so selection bar updates trigger view refreshes
     _initDone = true;
@@ -928,6 +953,8 @@ function _updateQueryBarLabels(meta) {
         indLabel.textContent = parts.join(' - ');
     }
 
+    _updateMapCaption(meta);
+
     const infoBtn = document.getElementById('btn-indicator-info');
     const activeInd = _getActiveIndicator(meta);
     if (infoBtn && cat && activeInd) {
@@ -938,6 +965,24 @@ function _updateQueryBarLabels(meta) {
         infoBtn.classList.remove('open');
         infoBtn.setAttribute('aria-label', `Informacion del indicador: ${label}`);
     }
+}
+
+/* Titulo, ambito, ano y fuente dentro del lienzo del mapa. Sin esto una captura
+   del mapa no se entiende sola (INFORME.md 4.1, punto 7). */
+function _updateMapCaption(meta) {
+    const titleEl = document.getElementById('map-caption-title');
+    const subEl = document.getElementById('map-caption-sub');
+    const srcEl = document.getElementById('map-canvas-source');
+    if (!titleEl || !subEl) return;
+    const cat = (meta || DataLoader.getMetadata()).categories
+        .find(c => c.id === State.get('activeCategory'));
+    const ind = document.getElementById('indicator-label')?.textContent || '';
+    titleEl.textContent = [cat?.label, ind].filter(Boolean).join(' · ');
+    const levelLabel = { country: 'Países', region: 'Regiones',
+                         subnational: 'Subnacional' }[State.get('geoLevel')]
+                       || State.get('geoLevel');
+    subEl.textContent = 'América Latina · ' + levelLabel + ' · ' + State.get('currentYear');
+    if (srcEl) srcEl.textContent = document.getElementById('footer-source')?.textContent || '';
 }
 
 function _updateFooterSource(catId) {
@@ -1151,6 +1196,22 @@ function _activateAboutSection(sectionId = 'equipo', meta = DataLoader.getMetada
         el.classList.toggle('active', el.id === `about-${section}`);
     });
     if (section === 'cobertura') _ensureAboutCoverage(meta);
+    if (section === 'metodos') _ensureComoTrabajamos();
+}
+
+/* "Como trabajamos" is loaded the first time its tab is opened: the module plus the
+   provenance JSON it reads are ~110 KB, which has no business in the initial payload. */
+let _metodosLoading = null;
+function _ensureComoTrabajamos() {
+    const host = document.getElementById('metodos-host');
+    if (!host || _metodosLoading) return;
+    _metodosLoading = import('./methods/como-trabajamos.js?v=20260906f')
+        .then(mod => mod.default.render(host))
+        .catch(err => {
+            _metodosLoading = null;
+            console.error('[ABOUT] "Como trabajamos" no se pudo cargar:', err);
+            host.innerHTML = '<p class="pv-empty">No se pudo cargar la secci&oacute;n.</p>';
+        });
 }
 
 function _syncRightPanelState() {
@@ -1498,6 +1559,9 @@ function _initMobileRightPanelDismiss() {
 
     panel.addEventListener('pointerdown', event => {
         if (!_isMobileRightPanel() || panel.classList.contains('hidden')) return;
+        // The sheet now has a real close button inside the drag zone. Capturing the pointer
+        // there would swallow its click and leave the only visible exit inert.
+        if (event.target?.closest?.('#right-panel-close')) return;
         const rect = panel.getBoundingClientRect();
         const localY = event.clientY - rect.top;
         if (localY > 58) return;
@@ -1527,8 +1591,12 @@ function _initMobileRightPanelDismiss() {
     panel.addEventListener('pointercancel', resetDrag);
 }
 
-function _isMobileRightPanel() {
+function _isNarrowViewport() {
     return window.matchMedia?.('(max-width: 760px)').matches || window.innerWidth <= 760;
+}
+
+function _isMobileRightPanel() {
+    return _isNarrowViewport();
 }
 
 function _prepareMobileRightPanelOpen() {
@@ -1538,6 +1606,7 @@ function _prepareMobileRightPanelOpen() {
     document.getElementById('rp-products')?.classList.add('collapsed');
     document.getElementById('rp-partners')?.classList.add('collapsed');
     _syncRightPanelState();
+    const viewId = State.get('activeView');
     if (viewId === 'trend') {
         _updateYearRangeFromData();
         updateTimeline();
@@ -3165,6 +3234,17 @@ async function _onCategoryChange(meta) {
     }
 }
 
+/** Clamp the current year and range to the years the bilateral matrix actually covers. */
+function _clampYearToBilateralRange() {
+    const bYears = DataLoader.getBilateralYears();
+    if (!bYears.length) return;
+    const first = bYears[0], last = bYears[bYears.length - 1];
+    const cur = State.get('currentYear');
+    if (cur < first) State.set('currentYear', first);
+    if (cur > last) State.set('currentYear', last);
+    State.set('yearRange', [first, last]);
+}
+
 function _onIndicatorChange() {
     _updateQueryBarLabels(DataLoader.getMetadata());
     _clearMapLegend();
@@ -3182,14 +3262,20 @@ function _onIndicatorChange() {
         if (enteringBilateral && State.get('selectedCountries').length > 0) {
             State.clearCountries();
         }
-        // Clamp year to bilateral range (1961-2023)
-        const bYears = DataLoader.getBilateralYears();
-        if (bYears.length > 0) {
-            const cur = State.get('currentYear');
-            if (cur < bYears[0]) State.set('currentYear', bYears[0]);
-            if (cur > bYears[bYears.length - 1]) State.set('currentYear', bYears[bYears.length - 1]);
-            State.set('yearRange', [bYears[0], bYears[bYears.length - 1]]);
+        // bilateral.json is fetched here, not with the trade category, because it is 10.4 MB
+        // and nothing outside these indicators reads it. Until it lands its year list is
+        // empty, so the clamp below is re-applied when the fetch resolves.
+        if (!DataLoader.isBilateralLoaded?.()) {
+            DataLoader.loadBilateral?.().then(() => {
+                if (!State.get('activeIndicator')?.startsWith('bilateral_')) return;
+                _clampYearToBilateralRange();
+                _buildRPProducts();
+                _buildRPPartners();
+                _updateCurrentView();
+                updateTimeline();
+            });
         }
+        _clampYearToBilateralRange();
         if (State.get('activeView') !== 'bilateral') {
             State.set('activeView', 'bilateral');
             _buildTopViews();
@@ -3263,6 +3349,7 @@ function _updateAllViews() {
     if (_categoryChanging) return;   // defer until category switch completes
     updateTimeline();
     _updateCurrentView();
+    _updateMapCaption();
 }
 
 /* -----------------------------------------------

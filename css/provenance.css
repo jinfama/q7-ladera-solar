@@ -1,0 +1,139 @@
+/* provenance.css — styles for the "Como trabajamos" methods section.
+   Copied into each viewer alongside js/methods/provenance-panel.js. THIS COPY
+   reads the viewer's chrome tokens (--c-bg-s, --c-surface, --c-border,
+   --c-text-*) with the original neutral greys as fallbacks, so the panel is
+   lime-washed like the rest of the Atlas instead of paper-white. If this file
+   is ever re-copied from the shared original, that tinting is what is lost.
+   The three PROVENANCE COLOURS — observed #1a4d2e, estimated #e0b070, no data
+   #d6d3cc — and the bar they sit in are a data encoding: do not retint them.
+   Mobile first: panels stack, the coverage matrix owns its own horizontal scroll, and every
+   hit target that a finger has to reach is at least 44 px. */
+
+.pv-section { max-width: 1100px; margin: 0 auto; padding: 20px 16px 64px; }
+
+.pv-section h2 { font-size: 1.5rem; margin: 0 0 .4em; }
+.pv-section h3 { font-size: 1.05rem; margin: 0; }
+
+.pv-prose { max-width: 68ch; line-height: 1.62; font-size: 1rem; }
+.pv-prose p { margin: 0 0 1em; }
+.pv-prose strong { font-weight: 650; }
+
+.pv-headline {
+    display: flex; flex-wrap: wrap; gap: 10px 22px;
+    margin: 18px 0 26px; padding: 14px 16px;
+    background: var(--c-bg-s, #EDE2C7); border: 1px solid var(--c-border-lt, #DFD1B2); border-radius: 0;
+}
+.pv-headline div { min-width: 120px; }
+.pv-headline b { display: block; font-size: 1.35rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.pv-headline span { font-size: .8rem; color: var(--c-text-3, #746048); }
+
+/* ── one series panel ───────────────────────────────────────────────────────────────── */
+
+.pv-grid { display: grid; gap: 22px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .pv-grid { grid-template-columns: 1fr 1fr; } }
+
+.pv-panel {
+    border: 1px solid var(--c-border-lt, #DFD1B2); border-radius: 0; padding: 14px 16px 16px; background: var(--c-surface, #FBF7EC);
+}
+.pv-head { margin-bottom: 10px; }
+.pv-sub { margin: 2px 0 0; font-size: .82rem; color: var(--c-text-3, #746048); }
+
+.pv-bar {
+    display: flex; height: 9px; border-radius: 0; overflow: hidden;
+    background: #e8e6e1; margin: 8px 0 6px;
+}
+.pv-bar-seg { display: block; height: 100%; }
+.pv-bar-seg.obs { background: #1a4d2e; }
+.pv-bar-seg.est { background: #e0b070; }
+.pv-bar-seg.nod { background: #d6d3cc; }
+.pv-bar-cap { margin: 0 0 10px; font-size: .8rem; color: var(--c-text-3, #746048); line-height: 1.45; }
+
+.pv-chart { width: 100%; }
+.pv-chart svg { width: 100%; height: auto; display: block; }
+.pv-axis text { font-size: 10.5px; fill: var(--c-text-3, #746048); }
+.pv-axis path, .pv-axis line { stroke: var(--c-border, #CDBB99); }
+
+.pv-legend {
+    list-style: none; margin: 8px 0 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .78rem; color: var(--c-text-2, #54443A);
+}
+.pv-legend li { display: flex; align-items: center; gap: 6px; }
+.pv-sw {
+    width: 10px; height: 10px; border-radius: 0; display: inline-block;
+    border: 1px solid rgba(0, 0, 0, .18); flex: 0 0 auto; margin-right: 3px;
+}
+
+.pv-actions {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 12px;
+}
+.pv-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .84rem; cursor: pointer; min-height: 44px;
+}
+.pv-toggle input { width: 22px; height: 22px; cursor: pointer; flex: 0 0 auto; }
+/* The whole label is the hit target (the input sits inside it), and it clears 44 px. */
+.pv-toggle { padding: 0 4px; }
+.pv-dl {
+    font: inherit; font-size: .82rem; min-height: 44px; padding: 0 14px;
+    border: 1px solid var(--c-border, #CDBB99); border-radius: 0; background: var(--c-bg-s, #EDE2C7);
+    color: var(--c-text, #231A15); cursor: pointer;
+}
+.pv-dl:hover { background: var(--c-bg-h, #E4D7B8); }
+.pv-dl:focus-visible { outline: 2px solid var(--c-primary, #9A2B2B); outline-offset: 2px; }
+
+.pv-empty { font-size: .85rem; color: var(--c-text-3, #746048); padding: 20px 0; }
+
+/* ── coverage matrix ────────────────────────────────────────────────────────────────── */
+
+.pv-matrix-scroll {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--c-border-lt, #DFD1B2); border-radius: 0; background: var(--c-surface, #FBF7EC); padding: 6px 0;
+}
+.pv-mx-label { font-size: 9.5px; fill: var(--c-text-3, #746048); }
+
+/* ── tooltip (shared by the series chart and the matrix) ────────────────────────────── */
+
+.pv-tip {
+    position: fixed; z-index: 9999; display: none; pointer-events: none;
+    max-width: min(300px, calc(100vw - 24px));
+    background: var(--c-surface, #FBF7EC); color: var(--c-text, #231A15);
+    border: 1px solid var(--c-border, #CDBB99); border-radius: 0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .16);
+    padding: 9px 11px; font-size: .8rem; line-height: 1.4;
+}
+.pv-tip-h { font-weight: 650; margin-bottom: 2px; }
+.pv-tip-v { font-size: 1.05rem; font-variant-numeric: tabular-nums; margin-bottom: 5px; }
+.pv-chip {
+    /* Blanco a proposito: el fondo del chip es un COLOR DE DATOS (el metodo de
+       procedencia) inyectado en linea por provenance-panel.js. La cal #F4EBD6
+       baja el contraste sobre los doce colores de metodo (p.ej. #2b7a8c 4.92:1 -> 4.15:1,
+       #8a6d3b 4.85 -> 4.09, #4a7c9b 4.52 -> 3.81). Aqui manda la legibilidad. */
+    display: inline-block; color: #fff; border-radius: 0;
+    padding: 1px 7px; font-size: .7rem; letter-spacing: .02em; margin-bottom: 6px;
+}
+.pv-tip-dl { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; margin: 0; }
+.pv-tip-dl dt { color: var(--c-text-3, #746048); font-size: .74rem; }
+.pv-tip-dl dd { margin: 0; font-size: .78rem; }
+.pv-tip-note {
+    margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--c-border-lt, #DFD1B2);
+    font-size: .72rem; color: var(--c-text-3, #746048);
+}
+
+/* ── limits and sources ─────────────────────────────────────────────────────────────── */
+
+.pv-limits { margin: 28px 0 0; padding: 14px 16px; background: var(--c-bg-s, #EDE2C7);
+             border: 1px solid var(--c-border, #CDBB99); border-radius: 0; }
+.pv-limits h3 { margin-bottom: 8px; }
+.pv-limits ul { margin: 0; padding-left: 1.15em; font-size: .88rem; line-height: 1.55; }
+.pv-limits li { margin-bottom: .4em; }
+
+.pv-sources { margin-top: 22px; font-size: .85rem; }
+.pv-sources table { border-collapse: collapse; width: 100%; }
+.pv-sources th, .pv-sources td {
+    text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--c-border-lt, #DFD1B2);
+}
+.pv-sources td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+    .pv-panel *, .pv-matrix-scroll * { transition: none !important; animation: none !important; }
+}

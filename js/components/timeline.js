@@ -1,6 +1,6 @@
 /* timeline.js - Year slider with play/pause controls */
 
-import State from '../state.js?v=20260522-mobile-ui18';
+import State from '../state.js?v=20260906f';
 
 let _track, _fill, _handleFrom, _handleTo;
 let _trackRect;
@@ -251,8 +251,8 @@ function _toggleSpeedPopup(anchorBtn) {
         margin-bottom: 6px;
         display: flex;
         flex-direction: column;
-        background: var(--c-bg, #F2EBE0);
-        border: 1px solid var(--c-border, #C9BDA8);
+        background: var(--c-bg, #F4EBD6);
+        border: 1px solid var(--c-border, #CDBB99);
         box-shadow: 0 2px 8px rgba(0,0,0,.15);
         z-index: 100;
     `;
@@ -264,8 +264,8 @@ function _toggleSpeedPopup(anchorBtn) {
         btn.style.cssText = `
             padding: 4px 14px;
             border: none;
-            background: ${isActive ? 'var(--c-accent, #D4A032)' : 'transparent'};
-            color: ${isActive ? '#fff' : 'var(--c-text, #1A120B)'};
+            background: ${isActive ? 'var(--c-accent, #B5502F)' : 'transparent'};
+            color: ${isActive ? '#fff' : 'var(--c-text, #231A15)'};
             font-size: 11px;
             font-weight: ${isActive ? '700' : '500'};
             cursor: pointer;
@@ -273,7 +273,7 @@ function _toggleSpeedPopup(anchorBtn) {
             font-family: var(--ff, Inter, sans-serif);
         `;
         btn.addEventListener('mouseenter', () => {
-            if (i !== _speedIdx) btn.style.background = 'var(--c-bg-s, #E8DFD0)';
+            if (i !== _speedIdx) btn.style.background = 'var(--c-bg-s, #EDE2C7)';
         });
         btn.addEventListener('mouseleave', () => {
             if (i !== _speedIdx) btn.style.background = 'transparent';
