@@ -1126,7 +1126,17 @@ function _switchView(viewId) {
     if (viewId === 'trend') _ensureDefaultTrendCountry();
     document.body.classList.toggle('about-active', viewId === 'about');
     document.body.classList.toggle('country-profile-active', viewId === 'country');
-    if (viewId === 'about') _activateAboutSection('equipo', DataLoader.getMetadata());
+    if (viewId === 'about') {
+        // Which panel of About to open. Without this the view always landed on «Equipo»,
+        // so the cover had nowhere to send a reader asking for methodology and pointed at
+        // the raw docs/metodologia.md instead -- a file the browser downloads or shows as
+        // plain text. Accepts #view=about&sec=<id> and falls back to the old behaviour.
+        const SEC = ['cobertura', 'equipo', 'metodologia', 'metodos', 'publicaciones'];
+        const src = (_initialHash || location.hash || '').replace(/^#/, '');
+        const m = /(?:^|&)sec=([a-z]+)/.exec(src);
+        const sec = m && SEC.includes(m[1]) ? m[1] : 'equipo';
+        _activateAboutSection(sec, DataLoader.getMetadata());
+    }
     document.querySelectorAll('.viz-panel').forEach(p => p.classList.remove('active'));
     const panel = document.getElementById(`panel-${viewId}`);
     if (panel) { panel.classList.add('active'); }
