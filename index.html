@@ -11,107 +11,197 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --cal:#EDE2C7; --ink:#231A15; --ink-2:#54443A; --ink-3:#7E6B57;
-  --cochinilla:#9A2B2B; --sinopia:#B5502F;
+  --cal:#EDE2C7; --cal-2:#F4EBD6; --ink:#231A15; --ink-2:#54443A; --ink-3:#746048;
+  --cochinilla:#9A2B2B; --sinopia:#B5502F; --verde:#2F6B5B; --rule:rgba(35,26,21,.34);
   --display:'Archivo Black','Arial Black',Impact,sans-serif;
   --text:Archivo,'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;border-radius:0}
-html,body{height:100%;overflow:hidden}
 html{background:var(--cal);-webkit-text-size-adjust:100%}
-body{font-family:var(--text);color:var(--ink);background:var(--cal);line-height:1.42}
-body.scrubbing{-webkit-user-select:none;user-select:none}
+body{font-family:var(--text);color:var(--ink);background:var(--cal);line-height:1.42;min-height:100vh}
+body.scrubbing{-webkit-user-select:none;user-select:none;cursor:ew-resize}
+html,body{height:100%;overflow:hidden}
 
-/* the wall runs edge to edge behind everything */
-#wall,#fresco,#over,#plaster{position:fixed;inset:0;width:100%;height:100%;display:block}
+/* the wall: mottled lime, and a plaster grain multiplied on top of everything */
+#wall,#plaster{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 #wall{z-index:0}
-#fresco{z-index:1;touch-action:none}
-#over{z-index:2;pointer-events:none}
-#plaster{z-index:4;pointer-events:none;mix-blend-mode:multiply;opacity:.44}
+#plaster{z-index:5;mix-blend-mode:multiply;opacity:.40}
 
-.page{position:relative;z-index:3;height:100vh;height:100dvh;overflow:hidden;
-  display:flex;flex-direction:column;pointer-events:none}
-.page > *{pointer-events:auto}
-
-/* ---------- text column: as wide as its text needs, no wider ---------- */
-.col{width:max-content;max-width:min(450px,32vw);flex:0 0 auto;min-height:0;
-  padding:clamp(20px,3vh,36px) 0 clamp(14px,2.2vh,26px) clamp(20px,3.1vw,46px);
-  display:flex;flex-direction:column;justify-content:flex-start;
-  gap:clamp(10px,1.6vh,20px);position:relative}
-.col > *{flex:0 0 auto}
-.col::before{content:"";position:absolute;inset:0 -100px -60px -60px;z-index:-1;
-  background:linear-gradient(90deg,rgba(237,226,199,.93) 0%,rgba(237,226,199,.86) 52%,rgba(237,226,199,0) 100%);
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 72%,rgba(0,0,0,0) 100%);
-  mask-image:linear-gradient(180deg,#000 0%,#000 72%,rgba(0,0,0,0) 100%)}
-.mast{display:flex;flex-direction:column;gap:clamp(6px,.9vh,11px)}
+/* ---------- page ---------- */
+.page{position:relative;z-index:1;height:100vh;height:100dvh;
+  display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr);
+  grid-template-areas:"head stage" "cta stage" "index stage";
+  column-gap:clamp(14px,1.8vw,30px);
+  padding:clamp(14px,2.2vh,24px) clamp(14px,1.8vw,28px) clamp(10px,1.4vh,16px) clamp(18px,2.8vw,42px)}
+.head{grid-area:head;display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px);padding-bottom:clamp(10px,1.6vh,18px)}
+.cta{grid-area:cta;align-self:start}
+.index{grid-area:index;min-height:0;overflow:auto;padding-top:clamp(10px,1.8vh,20px)}
+.stage-wrap{grid-area:stage;display:flex;flex-direction:column;min-height:0;min-width:0}
 
 .eyebrow{display:flex;flex-wrap:wrap;gap:.4em .8em;align-items:center;
-  font-size:clamp(10px,.86vw,11.5px);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cochinilla)}
+  font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cochinilla)}
 .eyebrow i{display:inline-block;width:24px;height:8px;background:var(--sinopia);transform:rotate(-4deg)}
-.eyebrow span{color:#7a6650}
+.eyebrow span{color:var(--ink-3)}
 h1{font-family:var(--display);font-weight:400;line-height:.97;
-  font-size:clamp(32px,4.7vw,62px);letter-spacing:-.018em;color:var(--ink);max-width:12ch}
+  font-size:clamp(30px,3.5vw,50px);letter-spacing:-.018em;color:var(--ink);max-width:12ch}
 h1 em{font-style:normal;color:var(--cochinilla)}
-.lede{max-width:42ch;font-size:clamp(13px,1.06vw,16px);color:var(--ink-2);text-wrap:pretty}
-.lede b{color:#3d2f24;font-weight:700}
-.lede + .lede{font-size:clamp(12.5px,.98vw,14.5px);color:var(--ink-3)}
-.lede + .lede b{color:var(--ink-2);font-weight:700}
+.sub{font-size:clamp(14px,1.1vw,17px);font-weight:600;color:var(--ink-2);max-width:40ch;text-wrap:pretty}
+.lede{max-width:44ch;font-size:clamp(13px,.98vw,14.5px);color:var(--ink-2);text-wrap:pretty}
+.lede b{color:var(--ink);font-weight:700}
 
-/* ---------- the index: a rail of links, no boxes ---------- */
-.rail{margin-top:auto;width:100%;border-top:1px solid rgba(35,26,21,.34);
-  background:linear-gradient(180deg,rgba(237,226,199,0) 0%,rgba(237,226,199,.86) 40%,rgba(237,226,199,.97) 100%);
-  display:flex;flex-wrap:wrap;align-items:stretch;
-  padding:0 clamp(14px,3.1vw,46px);gap:0 clamp(14px,2.3vw,32px)}
-.rail a{display:inline-flex;align-items:center;gap:9px;min-height:52px;padding:4px 0;
-  color:var(--ink-2);text-decoration:none;font-size:13px;font-weight:700;
-  border-bottom:2px solid transparent;transition:color .13s,border-color .13s}
-.rail a svg{flex:0 0 auto;width:15px;height:15px;stroke:var(--ink-3);fill:none;
-  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .13s}
-.rail a:hover,.rail a:focus-visible{color:var(--cochinilla);border-bottom-color:var(--cochinilla);outline:none}
-.rail a:hover svg,.rail a:focus-visible svg{stroke:var(--cochinilla)}
-.rail a.lead{color:var(--ink)}
-.rail a.lead svg{stroke:var(--cochinilla)}
-.rail .spring{flex:1 1 auto;min-width:0}
-.rail .minor{font-weight:500;font-size:12.5px;color:var(--ink-3)}
-.rail .hints{position:relative;display:inline-flex;align-items:center;min-height:52px}
-.rail .hint,.rail .hint2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;
-  color:#8a7862;transition:opacity .6s;white-space:nowrap}
-.rail .hint2{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0}
-body.done .rail .hint{opacity:0}
-body.done .rail .hint2{opacity:1}
+/* ---------- CTA ---------- */
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:56px;padding:0 20px;background:var(--cochinilla);color:var(--cal-2);
+  text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.04em;
+  box-shadow:3px 3px 0 var(--ink);transition:background .13s,transform .13s}
+.cta svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.cta:hover,.cta:focus-visible{background:#7E1F1F;outline:none;transform:translate(-1px,-1px)}
+.cta:focus-visible{box-shadow:3px 3px 0 var(--ink),0 0 0 3px var(--cal),0 0 0 5px var(--ink)}
+
+/* ---------- index of the app's sections ---------- */
+.index h2{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  padding:0 0 6px;border-bottom:1px solid var(--rule)}
+.index a{display:flex;align-items:center;gap:11px;min-height:44px;padding:3px 2px;
+  color:var(--ink-2);text-decoration:none;font-size:14px;font-weight:600;
+  border-bottom:1px solid rgba(35,26,21,.14);transition:color .13s}
+.index a svg{flex:0 0 auto;width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.index a small{margin-left:auto;font-size:11.5px;font-weight:500;color:var(--ink-3);letter-spacing:.02em;text-align:right}
+.index a:hover,.index a:focus-visible{color:var(--cochinilla);outline:none}
+.index a:hover svg,.index a:focus-visible svg{stroke:var(--cochinilla)}
+
+/* ---------- stage ---------- */
+#stage{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+  touch-action:pan-y;cursor:crosshair}
+.mapbox{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.chartbox{position:relative;flex:0 0 auto;height:186px;display:flex;flex-direction:column;
+  border-top:1px solid var(--rule);margin-top:4px;padding-top:4px}
+canvas{display:block;width:100%;height:100%}
+/* the canvas is taken out of flow so its pixel size can never feed back into the layout */
+.mapcan{position:relative;flex:1 1 0px;min-height:0}
+#map{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;transition:opacity .7s ease}
+.legend{flex:0 0 auto}
+#map.on{opacity:1}
+#chart{flex:1 1 auto;min-height:0}
+
+/* explicit labels: what, unit, years. Always on a lime plate so nothing sits on paint */
+.rot{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.3;letter-spacing:.01em}
+.rot .u{font-weight:500;color:var(--ink-2)}
+.rot .yr{color:var(--cochinilla);font-variant-numeric:tabular-nums}
+.rot-map{position:absolute;left:0;top:0;z-index:3;max-width:min(300px,60%);
+  background:rgba(237,226,199,.92);padding:6px 9px 6px 0}
+.rot-chart{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;
+  padding:0 0 2px 2px;min-height:22px}
+.rot-chart .pin{display:inline-flex;align-items:center;gap:6px;color:var(--verde)}
+.rot-chart .pin::before{content:"";width:18px;height:3px;background:var(--verde)}
+.rot-chart .unpin{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:26px;
+  padding:0 8px;border:1.5px solid var(--verde);background:var(--cal-2);color:var(--verde);
+  font:700 12px var(--text);cursor:pointer}
+.rot-chart .unpin::before{content:"";position:absolute;inset:-9px -6px}  /* 44 px hit area */
+.rot-chart .unpin:hover,.rot-chart .unpin:focus-visible{background:var(--verde);color:var(--cal-2);outline:none}
+
+/* the map's indicator: two buttons, top right of the map */
+.mode{position:absolute;right:0;top:0;z-index:3;display:flex;border:1.5px solid var(--ink);background:var(--cal-2)}
+.mode button{min-height:44px;min-width:44px;padding:0 10px;border:0;background:var(--cal-2);color:var(--ink-2);
+  font:700 12px var(--text);cursor:pointer;letter-spacing:.02em}
+.mode button+button{border-left:1.5px solid var(--ink)}
+.mode button.on{background:var(--ink);color:var(--cal-2)}
+.mode button:focus-visible{outline:2px solid var(--cochinilla);outline-offset:-3px}
+.mode .s,.legend .nod .s,.rot-chart .s{display:none}
+/* legend: the colour scale, its unit and its range */
+.legend{position:absolute;left:0;bottom:0;z-index:3;width:210px;
+  background:rgba(237,226,199,.94);padding:8px 10px 8px 0;font-size:12px;color:var(--ink-2)}
+.legend .lt{font-weight:700;color:var(--ink);margin-bottom:4px}
+.legend .ramp{position:relative;height:12px;border:1px solid var(--ink);margin:2px 0 16px}
+.legend .ramp i{position:absolute;top:100%;transform:translateX(-50%);font-style:normal;font-size:11.5px;
+  font-weight:600;color:var(--ink-2);padding-top:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.legend .ramp i::before{content:"";position:absolute;left:50%;top:-13px;width:1px;height:12px;background:var(--ink)}
+.legend .ramp i:first-child{transform:none}
+.legend .ramp i:first-child::before{left:0}
+.legend .note{font-size:11.5px;line-height:1.35;color:var(--ink-3)}
+.legend .note b{color:var(--ink-2);font-weight:600}
+.legend .nod{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11.5px;color:var(--ink-3)}
+.legend .nod i{width:16px;height:11px;border:1px solid var(--ink-2);
+  background:repeating-linear-gradient(135deg,rgba(84,68,58,.45) 0 1px,transparent 1px 4px)}
+
+/* tooltip */
+.tip{position:absolute;z-index:6;pointer-events:none;min-width:150px;max-width:230px;
+  background:rgba(244,235,214,.98);border:2px solid var(--ink);padding:8px 11px 9px;
+  font-size:12.5px;color:var(--ink-2);line-height:1.4;box-shadow:2px 2px 0 rgba(35,26,21,.25)}
+.tip b{display:block;font-size:14px;color:var(--ink);margin-bottom:2px}
+.tip .v{display:block;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.tip .s{display:block;font-variant-numeric:tabular-nums}
+.tip .h{display:block;margin-top:4px;font-size:11px;color:var(--ink-3);font-style:italic}
+.tip.pinned{border-color:var(--verde)}
+.tip.pinned b{color:var(--verde)}
+
+/* ---------- time bar ---------- */
+.timebar{flex:0 0 auto;display:flex;align-items:center;gap:14px;min-height:56px;padding:6px 0 0}
+.play{flex:0 0 auto;width:48px;height:48px;border:2px solid var(--ink);background:var(--cal-2);
+  color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.play svg{width:20px;height:20px;fill:currentColor}
+.play .ic-pause{display:none}
+.play.on .ic-play{display:none}.play.on .ic-pause{display:block}
+.play:hover,.play:focus-visible{background:var(--ink);color:var(--cal-2);outline:none}
+.play:focus-visible{box-shadow:0 0 0 2px var(--cal),0 0 0 4px var(--cochinilla)}
+.slider{flex:1 1 auto;min-width:0;height:44px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;margin:0}
+.slider::-webkit-slider-runnable-track{height:4px;background:var(--rule);border:0}
+.slider::-moz-range-track{height:4px;background:var(--rule);border:0}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:26px;margin-top:-11px;
+  background:var(--cochinilla);border:2px solid var(--ink);box-shadow:0 0 0 2px var(--cal)}
+.slider::-moz-range-thumb{width:18px;height:22px;background:var(--cochinilla);border:2px solid var(--ink);border-radius:0}
+.slider:focus-visible{outline:none}
+.slider:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--cal),0 0 0 4px var(--cochinilla)}
+.yearbig{flex:0 0 auto;font-family:var(--display);font-size:36px;line-height:1;color:var(--cochinilla);
+  font-variant-numeric:tabular-nums;min-width:4.2ch;text-align:right}
+.hint{flex:0 0 auto;font-size:12px;color:var(--ink-3);padding:4px 0 0;line-height:1.35}
+.hint kbd{font:600 11px var(--text);color:var(--ink-2);border:1px solid var(--rule);padding:0 4px}
 
 .rise{opacity:0;transform:translateY(7px);animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
-.d1{animation-delay:.07s}.d2{animation-delay:.14s}.d3{animation-delay:.21s}
+.d1{animation-delay:.07s}.d2{animation-delay:.14s}.d3{animation-delay:.21s}.d4{animation-delay:.28s}
 @keyframes rise{to{opacity:1;transform:none}}
 
+/* ---------- phone: title, stage, time bar, fixed CTA, index ---------- */
 @media (max-width:899px){
-  .col{max-width:none;width:auto;flex:0 0 auto;justify-content:flex-start;
-    padding:clamp(10px,1.8vh,16px) clamp(15px,4.6vw,22px) 2px;gap:clamp(5px,.8vh,9px)}
-  .col::before{inset:0 0 -22px 0;
-    background:linear-gradient(180deg,rgba(237,226,199,.95) 0%,rgba(237,226,199,.90) 74%,rgba(237,226,199,0) 100%)}
-  h1{font-size:clamp(29px,7.4vw,42px);max-width:none}
-  .lede{max-width:none;font-size:13.5px}
-  .lede + .lede{font-size:12.5px}
-  .rail{padding:0 clamp(13px,4.2vw,20px);gap:0 14px}
-  .rail a{min-height:40px;font-size:12px;gap:6px}
-  .rail a svg{width:13px;height:13px}
-  .rail .minor{font-size:11.5px}
-  .rail .spring,.rail .hints{display:none}
-}
-@media (max-height:540px) and (orientation:landscape){
-  .col{padding:8px clamp(14px,4vw,20px) 2px;gap:4px}
-  .eyebrow{font-size:9.5px;letter-spacing:.12em}
-  h1{font-size:clamp(22px,5.6vh,30px)}
-  .lede{font-size:11.5px;line-height:1.32}
-  .lede + .lede{display:none}
-  .rail a{min-height:36px;font-size:11.5px;gap:6px}
-  .rail a svg{width:12px;height:12px}
+  html,body{overflow:auto;height:auto}
+  .page{display:flex;flex-direction:column;height:auto;min-height:100dvh;padding:12px 12px 0;gap:8px}
+  .head{order:1;gap:6px;padding-bottom:2px}
+  .eyebrow span:last-child,.sub{display:none}
+  h1{font-size:clamp(27px,7vw,36px);max-width:none}
+  .lede{font-size:13px;max-width:none}
+  .stage-wrap{order:2;flex:0 0 auto}
+  #stage{height:max(58vh,470px)}
+  .chartbox{height:auto;padding-top:3px}
+  #chart{flex:0 0 96px;height:96px}
+  .rot{font-size:12px}
+  .rot-map{max-width:calc(100% - 118px);padding-right:0}
+  /* room for the pinned country's line from the start, so pinning never moves the map */
+  .rot-chart{min-height:48px;align-content:start}
+  .rot-chart .l{display:none}.rot-chart .s{display:inline}
+  .mode .l{display:none}.mode .s{display:inline}
+  .mode button{padding:0 9px;font-size:12.5px}
+  /* on a phone the legend is a strip under the map, not a card over it */
+  .legend{position:static;width:auto;padding:3px 0 0;font-size:11.5px;
+    display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:0 10px;align-items:start}
+  .legend .lt{grid-column:1;font-size:11.5px;margin:0}
+  .legend .ramp{grid-column:2;grid-row:1 / span 2;height:10px;margin:3px 0 0}
+  .legend .ramp i{font-size:11px}
+  .legend .note{display:none}
+  .legend .nod{grid-column:1;margin-top:2px;font-size:11px;line-height:1.3}
+  .legend .nod .l{display:none}.legend .nod .s{display:inline}
+  .tip{font-size:12px;max-width:210px}
+  .timebar{gap:10px}
+  .play{width:44px;height:44px}
+  .yearbig{font-size:28px}
+  .hint{font-size:12px;padding-top:2px}
+  .hint .kb{display:none}
+  .index{order:3;overflow:visible;padding:6px 0 calc(78px + env(safe-area-inset-bottom))}
+  .cta{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:20;min-height:54px;font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){
   .rise{animation:none;opacity:1;transform:none}
-  .rail a{transition:none}
-  .rail .hint{display:none}
-  .rail .hint2{opacity:1;position:static;transform:none}
+  #map{transition:none}
+  .cta,.play,.index a{transition:none}
 }
 </style>
 </head>
@@ -121,7 +211,7 @@ body.done .rail .hint2{opacity:1}
   <defs>
     <filter id="mottle" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
       <feTurbulence type="fractalNoise" baseFrequency="0.0026 0.0034" numOctaves="3" seed="5" result="t"/>
-      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.44  0 0 0 0 0.33  0 0 0 0 0.16  0 0 0 0.25 0"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0.44  0 0 0 0 0.33  0 0 0 0 0.16  0 0 0 0.22 0"/>
     </filter>
     <filter id="lime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
       <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="2" seed="13" result="g"/>
@@ -131,85 +221,126 @@ body.done .rail .hint2{opacity:1}
   <rect width="100%" height="100%" fill="#EDE2C7"/>
   <rect width="100%" height="100%" filter="url(#mottle)"/>
 </svg>
-
-<canvas id="fresco" aria-hidden="true"></canvas>
-<canvas id="over" aria-hidden="true"></canvas>
-
 <svg id="plaster" aria-hidden="true" preserveAspectRatio="none">
   <rect width="100%" height="100%" filter="url(#lime)"/>
 </svg>
 
 <main class="page">
-  <div class="col" id="col">
-    <div class="mast">
-      <p class="eyebrow rise"><i></i><span>Historia agraria</span><span>Am&eacute;rica Latina</span><span>1900&ndash;2024</span></p>
-      <h1 class="rise d1">Atlas Agrario <em>de Am&eacute;rica Latina</em></h1>
-      <p class="lede rise d2">Un visor para mirar el campo latinoamericano a lo largo de un siglo: qu&eacute; se cultiva y d&oacute;nde, cu&aacute;nta tierra ocupa, qui&eacute;n lo trabaja y por d&oacute;nde sale hacia fuera.</p>
-      <p class="lede rise d3">El muro de al lado es el continente pintado con sus propios datos. <b>Arrastra de izquierda a derecha para recorrer el siglo</b> y pasa el cursor &mdash;o el dedo&mdash; por un pa&iacute;s.</p>
-    </div>
-  </div>
+  <header class="head">
+    <p class="eyebrow rise"><i></i><span>Historia agraria</span><span>Am&eacute;rica Latina</span><span>1900&ndash;2023</span></p>
+    <h1 class="rise d1">Atlas Agrario <em>de Am&eacute;rica Latina</em></h1>
+    <p class="sub rise d2">Un siglo de producci&oacute;n, tierra, trabajo y comercio en 21 pa&iacute;ses.</p>
+    <p class="lede rise d3">Un visor para mirar el campo latinoamericano a lo largo de un siglo: qu&eacute; se cultiva y d&oacute;nde, cu&aacute;nta tierra ocupa, qui&eacute;n lo trabaja y por d&oacute;nde sale hacia fuera. <b>El fresco de al lado est&aacute; pintado con esos datos</b>: recorre el siglo, toca un pa&iacute;s y f&iacute;jalo para ver su serie.</p>
+  </header>
 
-  <nav class="rail" aria-label="Secciones del atlas">
-    <a class="lead" href="visor.html">
+  <a class="cta rise d4" id="cta" href="visor.html">
+    <span>Entrar al visor</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a>
+
+  <nav class="index rise d4" aria-label="Secciones del visor">
+    <h2>Secciones del visor</h2>
+    <a href="visor.html#cat=agriculture&amp;view=map">
       <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-      <span>Explorar el atlas</span></a>
+      <span>Mapa de cultivos</span><small>producci&oacute;n y &aacute;rea</small></a>
+    <a href="visor.html#cat=agriculture&amp;view=trend">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M6 16c3-1 4.5-4 6.5-6.5S17 5 21 5"/></svg>
+      <span>Series 1900&ndash;2023</span><small>tendencias por pa&iacute;s</small></a>
+    <a href="visor.html#cat=trade&amp;view=map">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>
+      <span>Comercio exterior</span><small>flujos y bilaterales</small></a>
     <a href="visor.html#view=about&amp;sec=metodologia">
       <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
-      <span>Datos y metodolog&iacute;a</span></a>
-    <a href="visor.html#view=about">
+      <span>Datos y metodolog&iacute;a</span><small>fuentes y procedencia</small></a>
+    <a href="visor.html#view=about&amp;sec=equipo">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/><path d="M8 7h8M8 11h6"/></svg>
-      <span>Equipo y publicaciones</span></a>
-    <a class="minor" href="visor.html#cat=trade&amp;view=map">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>
-      <span>Comercio exterior</span></a>
-    <a class="minor" href="visor.html#cat=agriculture&amp;view=trend">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M6 16c3-1 4.5-4 6.5-6.5S17 5 21 5"/></svg>
-      <span>Producci&oacute;n, 1900-2023</span></a>
-    <span class="spring" aria-hidden="true"></span>
-    <span class="hints" aria-hidden="true"><span class="hint">Toca o Esc para ver el fresco terminado</span><span class="hint2">Arrastra el muro para recorrer el siglo</span></span>
+      <span>Equipo y publicaciones</span><small>qui&eacute;n lo hace</small></a>
   </nav>
+
+  <section class="stage-wrap" aria-label="Escenario: mapa y serie de producci&oacute;n agraria">
+    <div id="stage">
+      <div class="mapbox" id="mapbox">
+        <div class="mapcan" id="mapcan"><canvas id="map" aria-hidden="true"></canvas></div>
+        <div class="rot rot-map" id="rotMap" aria-live="off"></div>
+        <div class="mode" role="group" aria-label="Indicador del mapa">
+          <button type="button" data-mode="yield" class="on" aria-pressed="true"><span class="l">Rendimiento &middot; t/ha</span><span class="s">t/ha</span></button>
+          <button type="button" data-mode="prod" aria-pressed="false"><span class="l">Producci&oacute;n &middot; Mt</span><span class="s">Mt</span></button>
+        </div>
+        <div class="legend" id="legend">
+          <div class="lt" id="legTitle"></div>
+          <div class="ramp" id="legRamp"></div>
+          <div class="note" id="legNote"></div>
+          <div class="nod"><i></i><span class="l">Hait&iacute; y Puerto Rico: sin serie de producci&oacute;n</span><span class="s">Color: dato del a&ntilde;o &middot; trama: crece con la producci&oacute;n &middot; Hait&iacute; y P. Rico sin serie</span></div>
+        </div>
+        <div class="tip" id="tip" hidden role="status"></div>
+      </div>
+      <div class="chartbox" id="chartbox">
+        <div class="rot rot-chart" id="rotChart"></div>
+        <canvas id="chart" aria-hidden="true"></canvas>
+      </div>
+    </div>
+    <div class="timebar">
+      <button type="button" class="play" id="play" aria-label="Reproducir" aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><polygon points="4 2 18 10 4 18"/></svg>
+        <svg class="ic-pause" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="2" width="5" height="16"/><rect x="12" y="2" width="5" height="16"/></svg>
+      </button>
+      <input class="slider" id="slider" type="range" min="1900" max="2023" step="1" value="1900" aria-label="A&ntilde;o" aria-valuetext="1900">
+      <div class="yearbig" id="yearbig" aria-hidden="true">1900</div>
+    </div>
+    <p class="hint">Arrastra sobre el fresco o mueve el deslizador para recorrer el siglo &middot; toca un pa&iacute;s y f&iacute;jalo con un clic<span class="kb"> &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> &plusmn;1 a&ntilde;o, <kbd>May&uacute;s</kbd> &plusmn;10, <kbd>espacio</kbd> reproduce, <kbd>Esc</kbd> suelta</span></p>
+  </section>
 </main>
 
-<script src="portada/latam-topo.js?v=20260906k"></script>
-<script src="portada/latam.js?v=20260906k"></script>
+<script src="portada/latam-topo.js?v=20260908"></script>
+<script src="portada/latam.js?v=20260908"></script>
 <script>
 (function(){
 'use strict';
 /* ------------------------------------------------------------------
-   Costa al fresco, y despues un muro que se deja recorrer.
+   Atlas Agrario de America Latina - portada V6 (2026-09-08).
 
-   1. La produccion agraria de los 21 paises del atlas, 1900-2023, se
-      dibuja como una curva que llena el muro.
-   2. Esa curva se pliega en la costa atlantica de Brasil.
-   3. El resto del continente se levanta en sinopia sobre un cuadriculado
-      que atraviesa toda la pared, y luego el muro toma color. La densidad
-      de manchas de cada pais es su produccion; el TONO de la mancha es su
-      rendimiento -toneladas por hectarea- en el ano que se esta pintando.
-      Nada se pinta por region.
-   4. Terminado el acto, el muro responde: arrastrar de izquierda a derecha
-      recorre el siglo y repinta el continente ano a ano; pasar el cursor
-      -o el dedo- por un pais lo enciende y lo explica.
+   Escenario: un fresco de cal con el continente pintado con sus datos.
+   - La SERIE es la produccion agraria de la region (suma de 19 paises),
+     en millones de toneladas, 1900-2023 (2024 no tiene dato: no se dibuja).
+   - El MAPA colorea cada pais, en el ano actual, por su rendimiento
+     (t/ha, escala log) o, si se cambia el indicador, por su produccion
+     (Mt, escala log). La trama de pinceladas crece con la produccion.
+   - Tiempo: intro <= 8 s con el contador corriendo; play/pausa, slider,
+     arrastre horizontal sobre el escenario, teclado.
+   - Espacio: hover/tap muestra nombre y valores; clic fija el pais y
+     dibuja su serie (eje derecho, en verde tierra) junto al total.
+   Solo datos del kit portada/latam.js y portada/latam-topo.js. Sin fetch.
    ------------------------------------------------------------------ */
-var CHART_END=2.95, FOLD_END=4.55, DRAW_END=5.35, PAINT_END=7.70, END=7.95;
-var RAD=Math.PI/180;
+var L=window.LATAM,T=window.LATAM_TOPO,body=document.body;
 var REDUCED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
-var T=window.LATAM_TOPO, L=window.LATAM, body=document.body;
-window.__fps=0;
-if(!T||!L||!T.objects||!T.objects.countries){body.classList.add('done');return;}
+var COARSE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+var RAD=Math.PI/180;
+window.__fps=0;window.__year=0;window.__hoverInfo=null;window.__pinned=null;window.__playing=false;window.__introDone=false;
+if(!T||!L||!T.objects||!T.objects.countries||!L.production||!L.production.latin_america){return;}
 
 function hash(a,b){var x=(a*374761393+b*668265263+22222)|0;
   x=Math.imul(x^(x>>>13),1274126177);return ((x^(x>>>16))>>>0)/4294967296;}
 function rng(seed){var a=seed>>>0;return function(){a|=0;a=(a+0x6D2B79F5)|0;
   var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;
   return ((t^(t>>>14))>>>0)/4294967296;};}
-function smoothstep(t){return t*t*(3-2*t);}
-function n1(x,sd){var i0=Math.floor(x),f=x-i0,a=hash(i0,sd),b=hash(i0+1,sd);return (a+(b-a)*smoothstep(f))*2-1;}
-function fbm(x,sd){return n1(x,sd)*0.62+n1(x*2.31,sd+7)*0.26+n1(x*4.7,sd+19)*0.12;}
 function clamp01(x){return x<0?0:x>1?1:x;}
-function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function clamp(x,a,b){return x<a?a:x>b?b:x;}
 
-/* ---------- TopoJSON decode (no library, works on file://) ---------- */
-var sc=T.transform?T.transform.scale:[1,1], tr=T.transform?T.transform.translate:[0,0];
+/* ---------- series: 1900 -> last year with data (2023) ---------- */
+var PY=L.production_years,AG=L.production.latin_america;
+var Y0=1900,Y1=Y0;
+for(var q=PY.length-1;q>=0;q--){if(AG.production_t[q]!=null){Y1=PY[q];break;}}
+var i0=PY.indexOf(Y0),i1=PY.indexOf(Y1);
+var NSER=i1-i0+1;
+function slice(arr){var s=arr.slice(i0,i1+1),lv=null;
+  for(var j=0;j<s.length;j++){if(s[j]==null)s[j]=lv;else lv=s[j];}
+  return s;}
+var TOT=slice(AG.production_t),totMax=0;
+for(q=0;q<NSER;q++)if(TOT[q]>totMax)totMax=TOT[q];
+var NCTRY=0;Object.keys(L.production).forEach(function(k){if(k.length===3)NCTRY++;});
+
+/* ---------- TopoJSON decode + Lambert azimuthal equal-area ---------- */
+var sc=T.transform?T.transform.scale:[1,1],tr=T.transform?T.transform.translate:[0,0];
 var arcsGeo=T.arcs.map(function(a){var x=0,y=0,out=[];
   for(var i=0;i<a.length;i++){x+=a[i][0];y+=a[i][1];out.push([x*sc[0]+tr[0],y*sc[1]+tr[1]]);}
   return out;});
@@ -218,941 +349,485 @@ function ringOf(ringArcs){var pts=[];
     a=idx<0?arcsGeo[~idx].slice().reverse():arcsGeo[idx];
     for(var k=(pts.length?1:0);k<a.length;k++)pts.push(a[k]);}
   return pts;}
-var geoms=T.objects.countries.geometries.map(function(g){
-  var polys=g.type==='Polygon'?[g.arcs]:g.arcs;
-  return {iso:g.properties.iso3,name:g.properties.name,
-          rings:polys.map(function(p){return p.map(ringOf);})};
-});
-
-/* ---------- the Atlantic arc of Brazil, in lon/lat ----------
-   The east side of the country's biggest ring, from its far south to its
-   far north, trimmed at the mouth of the Amazon so what is left is coast
-   and only coast. */
-function brazilAtlantic(){
-  var g=null,i;
-  for(i=0;i<geoms.length;i++)if(geoms[i].iso==='BRA')g=geoms[i];
-  if(!g)return null;
-  var best=null;
-  g.rings.forEach(function(poly){poly.forEach(function(r){
-    if(!best||r.length>best.length)best=r;});});
-  if(!best||best.length<60)return null;
-  var iS=0,iN=0;
-  for(i=0;i<best.length;i++){
-    if(best[i][1]<best[iS][1])iS=i;      /* far south: smallest latitude  */
-    if(best[i][1]>best[iN][1])iN=i;      /* far north: largest latitude   */
-  }
-  var A=iS<iN?best.slice(iS,iN+1):best.slice(iS).concat(best.slice(0,iN+1));
-  var B=iN<iS?best.slice(iN,iS+1):best.slice(iN).concat(best.slice(0,iS+1));
-  function mlon(c){var s=0;for(var q=0;q<c.length;q++)s+=c[q][0];return s/c.length;}
-  var E=mlon(A)>mlon(B)?A:B;
-  if(E[0][1]>E[E.length-1][1])E=E.slice().reverse();   /* run it south to north */
-  /* stop at the Amazon: past that the outline is border, not shore */
-  var cut=E.length;
-  for(i=0;i<E.length;i++)if(E[i][1]>0.6){cut=i;break;}
-  E=E.slice(0,Math.max(40,cut));
-  return E;
-}
-var BRA_COAST=brazilAtlantic();
-
-/* Lambert azimuthal equal-area centred on the continent */
 var l0=-70*RAD,p0=-12*RAD,sp0=Math.sin(p0),cp0=Math.cos(p0);
 function proj(lon,lat){var l=lon*RAD-l0,p=lat*RAD,sp=Math.sin(p),cp=Math.cos(p),cl=Math.cos(l);
   var kk=Math.sqrt(2/(1+sp0*sp+cp0*cp*cl));
   return [kk*cp*Math.sin(l),-kk*(cp0*sp-sp0*cp*cl)];}
 var arcsP=arcsGeo.map(function(a){return a.map(function(c){return proj(c[0],c[1]);});});
-var geomsP=geoms.map(function(g){
-  return {iso:g.iso,name:g.name,
-          rings:g.rings.map(function(poly){return poly.map(function(r){
-            return r.map(function(c){return proj(c[0],c[1]);});});})};
-});
-var coastP=BRA_COAST?BRA_COAST.map(function(c){return proj(c[0],c[1]);}):null;
+var geoms=T.objects.countries.geometries.map(function(g){
+  var polys=g.type==='Polygon'?[g.arcs]:g.arcs;
+  var p=L.production[g.properties.iso3];
+  var o={iso:g.properties.iso3,name:g.properties.name,
+    rings:polys.map(function(pp){return pp.map(function(r){return ringOf(r).map(function(c){return proj(c[0],c[1]);});});}),
+    s:(p&&p.production_t)?slice(p.production_t):null,
+    a:(p&&p.area_ha)?slice(p.area_ha):null};
+  o.has=!!(o.s&&o.s[NSER-1]>0);
+  o.y=null;
+  if(o.has&&o.a){o.y=new Float64Array(NSER);for(var j=0;j<NSER;j++)o.y[j]=(o.a[j]>0)?o.s[j]/o.a[j]:0;}
+  o.end=o.has?o.s[NSER-1]:0;
+  return o;});
+var totalEnd=0;geoms.forEach(function(g){totalEnd+=g.end;});
 var bb=[Infinity,Infinity,-Infinity,-Infinity];
 arcsP.forEach(function(a){a.forEach(function(c){
   if(c[0]<bb[0])bb[0]=c[0];if(c[1]<bb[1])bb[1]=c[1];
   if(c[0]>bb[2])bb[2]=c[0];if(c[1]>bb[3])bb[3]=c[1];});});
-if(!coastP){body.classList.add('done');}
 
-/* ---------- the series that becomes the shore ---------- */
-var PY=L.production_years, AG=(L.production&&L.production.latin_america)||null;
-var Y0=1900,Y1=2023,i0=PY.indexOf(Y0),i1=PY.indexOf(Y1);
-if(i0<0)i0=0;if(i1<0)i1=PY.length-1;
-var SER=[],last=0,q;
-for(q=i0;q<=i1;q++){var v=AG?AG.production_t[q]:null;if(v==null)v=last;else last=v;SER.push(v);}
-var NSER=SER.length,serMax=0;
-for(q=0;q<NSER;q++)if(SER[q]>serMax)serMax=SER[q];
-if(!serMax)serMax=1;
-
-function fill(arr){var s=arr.slice(i0,i1+1),lv=0;
-  for(var j=0;j<s.length;j++){if(s[j]==null)s[j]=lv;else lv=s[j];}
-  return s;}
-function serie(iso){var p=L.production&&L.production[iso];
-  return (p&&p.production_t)?fill(p.production_t):null;}
-function areaSerie(iso){var p=L.production&&L.production[iso];
-  return (p&&p.area_ha)?fill(p.area_ha):null;}
-var totalEnd=0;
-geomsP.forEach(function(g){g.s=serie(g.iso);g.a=areaSerie(g.iso);
-  g.end=g.s?g.s[g.s.length-1]:0;totalEnd+=g.end;});
-
-/* ---------- fresco palette: what wet lime can actually hold ----------
-   Ground earths and cochineal lake bleached by the plaster. There is ONE
-   pigment family and one scale on it. Where a country sits on that scale is
-   a magnitude of the atlas -its yield, tonnes per hectare, on a logarithmic
-   scale- and nothing else: no colour is handed out by region. */
-var LIME=[237,226,199], SOOT=[48,39,32];
-function mixc(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),
-  Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
-function cssc(c){return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
-function ladder(c){return [cssc(mixc(c,SOOT,0.46)),cssc(mixc(c,SOOT,0.24)),cssc(c),
-  cssc(mixc(c,LIME,0.13)),cssc(mixc(c,LIME,0.27))];}
+/* ---------- pigments ---------- */
+var LIME=[237,226,199],SOOT=[48,39,32];
+function mixc(a,b,t){return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];}
+function cssc(c,al){return al==null?'rgb('+c[0]+','+c[1]+','+c[2]+')':'rgba('+c[0]+','+c[1]+','+c[2]+','+al+')';}
 var RAMP=[[221,206,168],[203,171,112],[181,130,70],[157,88,50],[123,53,40],[84,32,34]];
-function rampCol(u){u=clamp01(u)*(RAMP.length-1);
-  var i=Math.min(RAMP.length-2,u|0);return mixc(RAMP[i],RAMP[i+1],u-i);}
-var NSTEP=26, STEPS=[];
-for(q=0;q<NSTEP;q++){var rc=rampCol(q/(NSTEP-1));STEPS.push({col:rc,t:ladder(rc)});}
-var YLO=Math.log(1.2), YHI=Math.log(24);
-function stepOf(y){if(!(y>0))return 0;
-  return Math.round(clamp01((Math.log(y)-YLO)/(YHI-YLO))*(NSTEP-1));}
-var TIDX=[0,0,1,1,2,2,2,3,4];
-var SIN='rgba(181,80,47,';
-/* tone tables: one ramp index per country and year, computed once */
-geomsP.forEach(function(g){
-  g.tone=new Uint8Array(NSER);
-  for(var j=0;j<NSER;j++){
-    var yv=(g.s&&g.a&&g.a[j]>0)?g.s[j]/g.a[j]:0;
-    g.tone[j]=stepOf(yv);
-  }
-});
+function rampCol(u){u=clamp01(u)*(RAMP.length-1);var i=Math.min(RAMP.length-2,u|0);return mixc(RAMP[i],RAMP[i+1],u-i);}
+/* the two indicators the map can show, both on a log scale */
+var MODES={
+  yield:{lo:Math.log(0.8),hi:Math.log(25),ticks:[1,3,10,25],
+    title:'Rendimiento agrario por país',unit:'toneladas por hectárea (t/ha)',
+    legend:'Rendimiento · t/ha · escala logarítmica',
+    note:'El color es el dato del año; la trama de pinceladas crece con la producción.',
+    val:function(g,yi){return g.y?g.y[yi]:0;},fmt:function(v){return dec1(v)+' t/ha';}},
+  prod:{lo:Math.log(0.2e6),hi:Math.log(1300e6),ticks:[1e6,10e6,100e6,1000e6],
+    title:'Producción agraria por país',unit:'millones de toneladas (Mt)',
+    legend:'Producción · Mt · escala logarítmica',
+    note:'El color es el dato del año; la trama de pinceladas crece con la producción.',
+    val:function(g,yi){return g.s?g.s[yi]:0;},fmt:function(v){return mt(v);}}
+};
+var mode='yield';
+function uOf(v){var m=MODES[mode];if(!(v>0))return 0;return clamp01((Math.log(v)-m.lo)/(m.hi-m.lo));}
+function colorOf(g,yi){return rampCol(uOf(MODES[mode].val(g,yi)));}
 
-/* ---------- canvases ---------- */
-var cv=document.getElementById('fresco'), ctx=cv.getContext('2d');
+/* ---------- number formats (es-ES) ---------- */
+function miles(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function dec1(n){return (Math.round(n*10)/10).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function mt(v){var n=v/1e6;return (n>=100?miles(n):dec1(n))+' Mt';}
+function pct(x){return (Math.round(x*1000)/10).toLocaleString('es-ES')+' %';}
+
+/* ---------- DOM ---------- */
+var $=function(id){return document.getElementById(id);};
+var stage=$('stage'),mapbox=$('mapbox'),chartbox=$('chartbox');
+var cv=$('map'),ctx=cv.getContext('2d'),cc=$('chart'),cx=cc.getContext('2d');
+var rotMap=$('rotMap'),rotChart=$('rotChart'),legTitle=$('legTitle'),legRamp=$('legRamp'),legNote=$('legNote');
+var tip=$('tip'),playBtn=$('play'),slider=$('slider'),yearbig=$('yearbig');
 var hitCtx=document.createElement('canvas').getContext('2d');
-var ov=document.getElementById('over'), octx=ov.getContext('2d');
-var colEl=document.getElementById('col'), railEl=document.querySelector('.rail');
-var VW=0,VH=0,dpr=1,plot=null,K=1,OX=0,OY=0,small=false;
-var DTOT=2400,DAB=3.4,painted=0,giornata=-1;
-var pacS=[],chartS=[],M=280,segs=[],NSEG=0,drawnSeg=0,coastDone=false;
-var mapBox=null,gratLayer=null,chartBase=0,ovDirty=null,namesDrawn=false,brushAt=0;
-var shadeLayer=null,baseLayer=null,railY=0,shadeBase=0,contoursDrawn=false,scrubDrawn=false;
-var scrubBox=null,tx0=0,tx1=1,curYi=0,everScrubbed=false;
+slider.min=Y0;slider.max=Y1;
+
+/* ---------- state ---------- */
+var VW=0,MW=0,MH=0,CW=0,CH=0,dpr=1,small=false,K=1,OX=0,OY=0,mapBox=null;
+var curYi=NSER-1,pinned=null,hoverG=null,playing=false,intro=false,rate=0,acc=0,lastTs=0;
+var baseLayer=null,dabLayer=null,dctx=null,hatch=null,rafR=0,rafP=0;
+var DAB=4.2,DTOT=3100,segs=[],chart=null,rotInset=0;
 
 function P(c){return [OX+c[0]*K,OY+c[1]*K];}
-function cumLen(p){var c=[0];for(var j=1;j<p.length;j++){var dx=p[j][0]-p[j-1][0],dy=p[j][1]-p[j-1][1];
-  c[j]=c[j-1]+Math.sqrt(dx*dx+dy*dy);}return c;}
-function resample(p,n){var c=cumLen(p),Lx=c[c.length-1],out=[],j=0;
-  if(!Lx)return p.slice(0,n);
-  for(var w=0;w<n;w++){var s=Lx*w/(n-1);
-    while(j<c.length-2&&c[j+1]<s)j++;
-    var sg=c[j+1]-c[j],u=sg>0?(s-c[j])/sg:0;
-    out.push([p[j][0]+(p[j+1][0]-p[j][0])*u,p[j][1]+(p[j+1][1]-p[j][1])*u]);}
-  return out;}
 
+/* ---------- layout ---------- */
 function layout(){
-  VW=window.innerWidth;VH=window.innerHeight;
+  VW=window.innerWidth;small=VW<900;
   dpr=Math.min(2,window.devicePixelRatio||1);
-  [cv,ov].forEach(function(c){c.width=Math.round(VW*dpr);c.height=Math.round(VH*dpr);
-    c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);});
-  small=VW<900;
-  var railTop=railEl?railEl.getBoundingClientRect().top:VH-56;
-  railY=railTop;
-  var colBox=colEl.getBoundingClientRect();
-  var scrubH=small?30:34;
-
-  if(!small){
-    /* the picture takes everything the column does not need and fills it */
-    var px=Math.round(colBox.right+18);
-    plot={x:px,y:22,w:Math.round(VW-px-26),h:Math.round(railTop-22-12-scrubH)};
-  }else{
-    /* en vertical el muro empieza donde acaba el texto y nunca por encima:
-       si se queda corto se le roba altura al hueco, no al titular */
-    var top=Math.max(colBox.bottom+8,VH*0.26),bot=railTop-8-scrubH;
-    if(bot-top<230)top=Math.max(colBox.bottom+8,bot-230);
-    plot={x:8,y:Math.round(top),w:VW-16,h:Math.round(Math.max(96,bot-top))};
-  }
+  var mb=cv.getBoundingClientRect(),cb=cc.getBoundingClientRect();
+  MW=Math.round(mb.width);MH=Math.round(mb.height);CW=Math.round(cb.width);CH=Math.round(cb.height);
+  cv.width=Math.round(MW*dpr);cv.height=Math.round(MH*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  cc.width=Math.round(CW*dpr);cc.height=Math.round(CH*dpr);cx.setTransform(dpr,0,0,dpr,0,0);
+  /* the map sits under the label row (label + indicator buttons) */
+  var rotH=Math.max(rotMap.offsetHeight,small?46:0)+6;rotInset=rotH;
+  var px=8,py=rotH,pw=MW-16,ph=MH-rotH-6;
   var bw=bb[2]-bb[0],bh=bb[3]-bb[1];
-  K=Math.min(plot.w/bw,plot.h/bh)*0.985;
-  OX=plot.x+(plot.w-bw*K)*(small?0.5:0.14)-bb[0]*K;
-  OY=plot.y+(plot.h-bh*K)/2-bb[1]*K;
-  /* where the drawn continent actually lands */
+  K=Math.min(pw/bw,ph/bh)*0.985;
+  OX=px+(pw-bw*K)*(small?0.56:0.52)-bb[0]*K;
+  OY=py+(ph-bh*K)*0.5-bb[1]*K;
   mapBox={x:OX+bb[0]*K,y:OY+bb[1]*K,w:bw*K,h:bh*K};
-  /* the century runs across the wall: the same x carries the background
-     figure and the rule you drag along */
-  tx0=small?12:18;
-  tx1=VW-14;
-  scrubBox={x:tx0,y:Math.round(railTop-scrubH-4),w:tx1-tx0,h:scrubH};
-  shadeBase=scrubBox.y-2;
-  ovDirty=null;contoursDrawn=false;scrubDrawn=false;wallOK=false;hoverG=null;baseLayer=null;
-  DAB=small?3.4:4.4;
-  DTOT=small?1700:3100;
-  M=small?190:250;
-
-  /* the Brazilian shore, and the same number of points of the series */
-  pacS=coastP?resample(coastP.map(P),M):[];
-  /* the growth curve, drawn big enough to hold the wall on its own */
-  var gx0=plot.x+plot.w*(small?0.10:0.11),gx1=plot.x+plot.w*(small?0.80:0.87),
-      gy0=plot.y+plot.h*0.985,gy1=plot.y+plot.h*0.13;
-  chartBase=gx0;
-  chartS=[];
-  for(var w=0;w<M;w++){
-    var t=w/(M-1),si=Math.min(NSER-1,Math.round(t*(NSER-1)));
-    var nv=Math.pow(SER[si]/serMax,0.86);
-    chartS.push([gx0+nv*(gx1-gx0),gy0+t*(gy1-gy0)]);
-  }
-
-  /* every drawn boundary, once - the sinopia of the whole continent */
+  DAB=small?3.3:4.3;DTOT=small?1700:3100;
   segs=[];
-  arcsP.forEach(function(a){var pts=a.map(P);
-    for(var j=1;j<pts.length;j++)segs.push([pts[j-1],pts[j]]);});
-  NSEG=segs.length;
-
-  geomsP.forEach(function(g){
+  arcsP.forEach(function(a){var pts=a.map(P);for(var j=1;j<pts.length;j++)segs.push([pts[j-1],pts[j]]);});
+  geoms.forEach(function(g){
     var path=new Path2D();
     g.rings.forEach(function(poly){poly.forEach(function(r){
-      for(var j=0;j<r.length;j++){var p=P(r[j]);
-        if(j===0)path.moveTo(p[0],p[1]);else path.lineTo(p[0],p[1]);}
+      for(var j=0;j<r.length;j++){var p=P(r[j]);if(j===0)path.moveTo(p[0],p[1]);else path.lineTo(p[0],p[1]);}
       path.closePath();});});
     g.path=path;
     var b=[Infinity,Infinity,-Infinity,-Infinity];
     g.rings.forEach(function(poly){poly.forEach(function(r){r.forEach(function(c){var p=P(c);
-      if(p[0]<b[0])b[0]=p[0];if(p[1]<b[1])b[1]=p[1];
-      if(p[0]>b[2])b[2]=p[0];if(p[1]>b[3])b[3]=p[1];});});});
+      if(p[0]<b[0])b[0]=p[0];if(p[1]<b[1])b[1]=p[1];if(p[0]>b[2])b[2]=p[0];if(p[1]>b[3])b[3]=p[1];});});});
     g.bbox=b;
-    /* the tilt and the stretch of the brush are the hand's, not a group's */
+    /* centroid of the biggest ring, for the tooltip anchor */
+    var best=null;g.rings.forEach(function(poly){if(!best||poly[0].length>best.length)best=poly[0];});
+    var sx=0,sy=0;best.forEach(function(c){var p=P(c);sx+=p[0];sy+=p[1];});
+    g.cx=sx/best.length;g.cy=sy/best.length;
     var hs=hash(g.iso.charCodeAt(0)*31,g.iso.charCodeAt(2));
-    g.ang=(hs-0.5)*2.6;
-    g.asp=1.20+hash(g.iso.charCodeAt(1)*17,g.iso.charCodeAt(0))*0.40;
-    g.quota=totalEnd>0?Math.max(2,Math.round(DTOT*g.end/totalEnd)):2;
+    g.ang=(hs-0.5)*2.6;g.asp=1.20+hash(g.iso.charCodeAt(1)*17,g.iso.charCodeAt(0))*0.40;
+    g.quota=totalEnd>0?Math.max(3,Math.round(DTOT*g.end/totalEnd)):0;
     g.pool=[];
-    var tries=0,need=g.quota,rand=rng(g.iso.charCodeAt(0)*7919+g.iso.charCodeAt(1)*131+g.iso.charCodeAt(2));
-    while(g.pool.length<need&&tries<need*30+400){tries++;
-      var x=b[0]+rand()*(b[2]-b[0]),y=b[1]+rand()*(b[3]-b[1]);
-      if(hitCtx.isPointInPath(g.path,x,y))g.pool.push([x,y]);}
-    var sh=rng(g.iso.charCodeAt(1)*2654435761);
-    for(var z=g.pool.length-1;z>0;z--){var wz=Math.floor(sh()*(z+1)),tmp=g.pool[z];g.pool[z]=g.pool[wz];g.pool[wz]=tmp;}
-    if(!g.pool.length)g.pool.push([(b[0]+b[2])/2,(b[1]+b[3])/2]);
+    if(g.has){
+      var tries=0,need=g.quota,rand=rng(g.iso.charCodeAt(0)*7919+g.iso.charCodeAt(1)*131+g.iso.charCodeAt(2));
+      while(g.pool.length<need&&tries<need*30+400){tries++;
+        var x=b[0]+rand()*(b[2]-b[0]),y=b[1]+rand()*(b[3]-b[1]);
+        if(hitCtx.isPointInPath(g.path,x,y))g.pool.push([x,y]);}
+      var sh=rng(g.iso.charCodeAt(1)*2654435761);
+      for(var z=g.pool.length-1;z>0;z--){var wz=Math.floor(sh()*(z+1)),tmp=g.pool[z];g.pool[z]=g.pool[wz];g.pool[wz]=tmp;}
+    }
     g.quota=g.pool.length;g.done=0;
-    /* every brush load carries the tone of the year it went on the wall, so
-       going back in time repaints exactly the wall of that year */
-    g.dtone=new Uint8Array(g.quota);
-    var d=0,yy;
-    for(yy=0;yy<NSER;yy++){var w2=wantAt(g,yy);
-      while(d<w2){g.dtone[d]=g.tone[yy];d++;}}
-    while(d<g.quota){g.dtone[d]=g.tone[NSER-1];d++;}
   });
+  buildBase();
+  if(!dabLayer){dabLayer=document.createElement('canvas');dctx=dabLayer.getContext('2d');}
+  dabLayer.width=cv.width;dabLayer.height=cv.height;dctx.setTransform(dpr,0,0,dpr,0,0);
+  geoms.forEach(function(g){g.done=0;});
+  if(!hatch){var hc=document.createElement('canvas');hc.width=hc.height=8;var h=hc.getContext('2d');
+    h.strokeStyle='rgba(84,68,58,.42)';h.lineWidth=1.2;h.beginPath();h.moveTo(-2,10);h.lineTo(10,-2);h.moveTo(-2,2);h.lineTo(2,-2);h.moveTo(6,10);h.lineTo(10,6);h.stroke();
+    hatch=ctx.createPattern(hc,'repeat');}
+  /* chart frame */
+  var CL=small?42:54,CR=pinned?(small?44:56):(small?12:16),CT=10,CB=small?18:20;
+  chart={x0:CL,x1:CW-CR,y0:CH-CB,y1:CT};
+}
+function wantAt(g,yi){if(!g.has)return 0;var w=Math.round(g.quota*(g.s[yi]/g.end));return clamp(w,0,g.quota);}
+function xAtYear(yi){return chart.x0+(yi/(NSER-1))*(chart.x1-chart.x0);}
+function yearAtX(x){return Math.round(clamp01((x-chart.x0)/(chart.x1-chart.x0))*(NSER-1));}
 
-  buildGraticule();
-  buildShade();
-  painted=0;giornata=-1;drawnSeg=0;coastDone=false;namesDrawn=false;brushAt=0;scrubDrawn=false;
-  geomsP.forEach(function(g){g.done=0;});
-  ctx.clearRect(0,0,VW,VH);octx.clearRect(0,0,VW,VH);
-}
-function wantAt(g,yi){
-  if(!g.s||!g.end)return 0;
-  var w=Math.round(g.quota*(g.s[yi]/g.end));
-  return w>g.quota?g.quota:(w<0?0:w);
-}
-
-/* ---------- the graticule: the whole wall is a charted wall ---------- */
-function buildGraticule(){
-  if(!gratLayer)gratLayer=document.createElement('canvas');
-  gratLayer.width=cv.width;gratLayer.height=cv.height;
-  var g=gratLayer.getContext('2d');
-  g.setTransform(dpr,0,0,dpr,0,0);
-  g.lineJoin='round';g.lineCap='round';
-  var lon,lat,first,p;
-  g.strokeStyle='rgba(181,80,47,.30)';g.lineWidth=1.0;
-  for(lon=-165;lon<=15;lon+=15){
-    g.beginPath();first=true;
-    for(lat=-80;lat<=55;lat+=2){p=P(proj(lon,lat));
-      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
-    g.stroke();
-  }
-  for(lat=-75;lat<=50;lat+=15){
-    g.beginPath();first=true;
-    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,lat));
-      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
-    g.stroke();
-  }
-  /* the equator and the two tropics carry a little more ink, as on a wall map */
-  g.strokeStyle='rgba(181,80,47,.46)';g.lineWidth=1.3;
-  [-23.44,0,23.44].forEach(function(la){
-    g.beginPath();first=true;
-    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,la));
-      if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
-    g.stroke();});
-  /* los paralelos van rotulados en el canal abierto del Pacifico, como en
-     cualquier mapa mural: llenan el hueco con la propia trama del mapa */
-  g.font='700 '+(small?8:9.5)+'px Archivo, Arial, sans-serif';
-  g.fillStyle='rgba(126,107,87,.62)';
-  g.textAlign='center';g.textBaseline='middle';
-  var mx0=mapBox?mapBox.x:VW,my0=mapBox?mapBox.y:0,my1=mapBox?mapBox.y+mapBox.h:VH;
-  [[20,'20° N'],[0,'0°'],[-20,'20° S'],[-40,'40° S']].forEach(function(pl){
-    for(var lo=-150;lo<=-100;lo+=6){
-      var pp=P(proj(lo,pl[0]));
-      if(pp[0]>plot.x+16&&pp[0]<mx0-26&&pp[1]>my0+8&&pp[1]<my1-8){
-        g.fillText(pl[1],pp[0],pp[1]);break;}
-    }
-  });
-  /* the two oceans, lettered into the plaster */
-  g.font='700 '+(small?9:12)+'px Archivo, Arial, sans-serif';
-  g.fillStyle='rgba(126,107,87,.55)';
-  g.textAlign='center';g.textBaseline='middle';
-  [[-114,-40,'O C É A N O   P A C Í F I C O'],
-   [-20,-30,'O C É A N O   A T L Á N T I C O']].forEach(function(o){
-    var q2=P(proj(o[0],o[1])),tw=g.measureText(o[2]).width/2;
-    if(q2[0]-tw>6&&q2[0]+tw<VW-6&&q2[1]>20&&q2[1]<VH-20)g.fillText(o[2],q2[0],q2[1]);
-  });
-}
-
-/* ---------- la figura de fondo ----------
-   Es la produccion agraria de la region, 1900 -> 2023, pero no es una grafica:
-   no lleva ejes, ni escala, ni rotulo. Es una masa grande y muy desenfocada
-   que ocupa el muro de lado a lado y sube de izquierda a derecha, con la
-   altura comprimida para que 1900 tenga cuerpo y no sea una linea al ras.
-   Lo que si conserva de la serie es el eje del tiempo: la misma x que se
-   arrastra para recorrer el siglo. */
-function buildShade(){
-  if(!shadeLayer)shadeLayer=document.createElement('canvas');
-  shadeLayer.width=cv.width;shadeLayer.height=cv.height;
-  var g=shadeLayer.getContext('2d');
-  g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,VW,VH);
-  var yb=shadeBase, yt=Math.max(4,plot.y-(small?4:8));
-  var span=(yb-yt)*0.96;
-  if(span<90){span=90;}
-  var j,pts=[];
-  for(j=0;j<NSER;j++){
-    var t=j/(NSER-1), nv=Math.pow(SER[j]/serMax,0.32);
-    pts.push([tx0+t*(tx1-tx0), yb-nv*span]);
-  }
-  /* el relleno es casi plano a proposito: si por dentro fuese un degradado,
-     el borde de arriba no se veria y la masa dejaria de tener silueta */
-  var A=small?1.30:1.0;
-  var grad=g.createLinearGradient(0,yb-span,0,yb);
-  grad.addColorStop(0,'rgba(172,108,66,'+(0.19*A).toFixed(3)+')');
-  grad.addColorStop(0.50,'rgba(146,94,56,'+(0.26*A).toFixed(3)+')');
-  grad.addColorStop(1,'rgba(92,63,41,'+(0.34*A).toFixed(3)+')');
-  function area(off,al){
-    g.globalAlpha=al;
-    g.beginPath();
-    g.moveTo(-120,yb+260);
-    g.lineTo(-120,pts[0][1]+off);
-    for(j=0;j<pts.length;j++)g.lineTo(pts[j][0],pts[j][1]+off);
-    g.lineTo(VW+120,pts[pts.length-1][1]+off);
-    g.lineTo(VW+120,yb+260);g.closePath();
-    g.fillStyle=grad;g.fill();
-  }
-  var soft=false;
-  try{g.filter='blur('+(small?20:30)+'px)';soft=(g.filter!=='none');}catch(e){}
-  /* si el navegador no da desenfoque, se consigue con pasadas desplazadas */
-  if(soft){
-    area(0,1);area(-span*0.10,0.34);
-    /* una pasada menos difusa para que el perfil se intuya sin dibujarse */
-    try{g.filter='blur('+(small?8:11)+'px)';}catch(e){}
-    area(0,0.30);
-  }else{for(var k=-6;k<=6;k++)area(k*(small?6:11),0.12);}
-  try{g.filter='none';}catch(e){}
-  g.globalAlpha=1;
-}
-function blitShade(x,y,w,h){
-  if(!shadeLayer)return;
-  x=Math.max(0,x);y=Math.max(0,y);
-  w=Math.min(w,VW-x);h=Math.min(h,VH-y);
-  if(w<=0||h<=0)return;
-  ctx.drawImage(shadeLayer,x*dpr,y*dpr,w*dpr,h*dpr,x,y,w,h);
-}
-/* ---------- el contorno negro, encima del color ----------
-   Lo que sostiene la imagen no es el color sino la linea: contorno grueso,
-   de peso desigual, cerrado sobre cada pais. Va despues de la pintura. */
-function drawContours(c){
-  c.save();c.lineJoin='round';c.lineCap='round';
-  geomsP.forEach(function(g){
-    c.strokeStyle='rgba(22,17,14,0.30)';
-    c.lineWidth=small?3.2:4.6;
-    c.stroke(g.path);
-    c.strokeStyle='rgba(19,15,13,0.90)';
-    c.lineWidth=small?1.5:2.3;
-    c.stroke(g.path);
-  });
-  c.restore();
-}
-
-/* blit only the band of graticule that is actually being repainted */
-function blitGrat(x,y,w,h){
-  if(!gratLayer)return;
-  x=Math.max(0,x);y=Math.max(0,y);
-  w=Math.min(w,VW-x);h=Math.min(h,VH-y);
-  if(w<=0||h<=0)return;
-  ctx.drawImage(gratLayer,x*dpr,y*dpr,w*dpr,h*dpr,x,y,w,h);
-}
-/* ---------- the fold: the curve becomes the shore ---------- */
-function foldPts(u){
-  var e=ease(clamp01(u)),out=[],w;
-  for(w=0;w<M;w++){
-    /* the head of the line lands first, so the shore sets from the south up */
-    var local=clamp01((e-0.22*(1-w/(M-1)))/0.78);
-    var a=chartS[w],b=pacS[w]||chartS[w];
-    out.push([a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local]);
-  }
-  return out;
-}
-/* the area the curve encloses, washed in like a first coat of colour */
-function chartWash(grow,alpha){
-  if(alpha<=0||!chartS.length)return;
-  var n=Math.max(2,Math.round(M*grow)),j;
-  ctx.save();ctx.globalAlpha=alpha;
-  ctx.fillStyle='rgba(181,80,47,.17)';
-  ctx.beginPath();ctx.moveTo(chartBase,chartS[0][1]);
-  for(j=0;j<n;j++)ctx.lineTo(chartS[j][0],chartS[j][1]);
-  ctx.lineTo(chartBase,chartS[n-1][1]);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='rgba(154,43,43,.18)';ctx.lineWidth=1.2;ctx.lineCap='round';
-  ctx.beginPath();
-  for(j=0;j<n;j+=9){
-    var yy=chartS[j][1];
-    ctx.moveTo(chartBase+2,yy);ctx.lineTo(chartS[j][0]-1.5,yy+2.5);
-  }
-  ctx.stroke();
-  ctx.restore();
-}
-/* While the curve is still a curve it must read as one: a time axis up the
-   side, a baseline and four dates. Lleva el nombre de lo que es y sus dos
-   extremos, y nada mas: ni un numero suelto haciendo de titular. */
-function mt(v){var n=v/1e6;return (n>=100?miles(n):dec1(n))+' Mt';}
-function chartFrame(alpha,grow){
-  if(alpha<=0||!chartS.length)return;
-  var yBot=chartS[0][1],yTop=chartS[M-1][1];
-  ctx.save();ctx.globalAlpha=alpha;
-  ctx.strokeStyle='rgba(126,107,87,.62)';ctx.lineWidth=1.1;
-  ctx.beginPath();ctx.moveTo(chartBase,yTop-8);ctx.lineTo(chartBase,yBot+8);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(chartBase,yBot+8);ctx.lineTo(chartS[M-1][0]+10,yBot+8);ctx.stroke();
-  ctx.font='700 '+(small?9:12)+'px Archivo, Arial, sans-serif';
-  ctx.fillStyle='rgba(126,107,87,.95)';ctx.textBaseline='middle';ctx.textAlign='right';
-  [1900,1950,2000,2023].forEach(function(y){
-    var t=(y-Y0)/(Y1-Y0),yy=yBot+(yTop-yBot)*t;
-    ctx.beginPath();ctx.moveTo(chartBase,yy);ctx.lineTo(chartBase+6,yy);ctx.stroke();
-    ctx.fillText(y,chartBase-5,yy);
-  });
-  ctx.textAlign='left';
-  ctx.font='700 '+(small?9.5:12)+'px Archivo, Arial, sans-serif';
-  /* cada extremo aparece cuando la linea llega a el, no antes */
-  if(grow>0.06){ctx.fillStyle='rgba(84,68,58,.95)';
-    ctx.fillText(mt(SER[0]),chartS[0][0]+9,yBot-2);}
-  if(grow>0.97){ctx.fillStyle='rgba(154,43,43,.95)';
-    ctx.fillText(mt(SER[NSER-1]),chartS[M-1][0]+11,yTop+1);}
-  var hx=plot.x+plot.w*(small?0.32:0.34), hy=plot.y+plot.h*0.46;
-  ctx.textBaseline='alphabetic';
-  ctx.font='700 '+(small?13:19)+'px Archivo, Arial, sans-serif';
-  ctx.fillStyle='rgba(35,26,21,.94)';
-  ctx.fillText('PRODUCCIÓN AGRARIA',hx,hy);
-  ctx.fillText('DE AMÉRICA LATINA',hx,hy+(small?16:23));
-  ctx.font='400 '+(small?10:12.5)+'px Archivo, Arial, sans-serif';
-  ctx.fillStyle='rgba(110,92,72,.95)';
-  ctx.fillText('millones de toneladas · 21 países · 1900 → 2023',hx,hy+(small?34:48));
-  ctx.restore();
-}
-function strokeSinopiaLine(c,pts,upto,wobble,single){
-  var n=Math.max(2,Math.min(pts.length,upto));
-  c.save();c.lineCap='round';c.lineJoin='round';
-  for(var pass=single?1:0;pass<2;pass++){
-    c.strokeStyle=SIN+(pass?0.30:0.58)+')';
-    c.lineWidth=pass?3.2:1.6;
-    c.beginPath();
-    for(var j=0;j<n;j++){
-      var d=wobble?fbm(j*0.5,pass+2)*1.4:0;
-      var x=pts[j][0]+d,y=pts[j][1]-d*0.7;
-      if(j===0)c.moveTo(x,y);else c.lineTo(x,y);
-    }
-    c.stroke();
-  }
-  c.restore();
-}
-function inkSegs(c,from,to){
-  c.save();c.lineCap='round';c.lineJoin='round';
-  for(var i=from;i<to&&i<NSEG;i++){
-    var s=segs[i],w=1.0+hash(i,1)*1.7,a=0.26+hash(i,2)*0.40;
-    var jx=(hash(i,3)-0.5)*1.5,jy=(hash(i,4)-0.5)*1.5;
-    c.strokeStyle=SIN+a.toFixed(2)+')';c.lineWidth=w;
-    c.beginPath();c.moveTo(s[0][0]+jx,s[0][1]+jy);
-    c.lineTo(s[1][0]+jx*0.6,s[1][1]+jy*0.6);c.stroke();
-  }
-  c.restore();
-}
-var SEG_BUDGET=700;
-function sinopiaTo(n){
-  if(n<=drawnSeg)return;
-  if(n>drawnSeg+SEG_BUDGET)n=drawnSeg+SEG_BUDGET;
-  inkSegs(ctx,drawnSeg,n);
-  drawnSeg=Math.min(n,NSEG);
-}
-
-/* ---------- una carga de pincel ----------
-   No es una elipse. Lo que baja al muro es un PLANO: de cuatro a seis lados,
-   ninguno igual, cortados en angulo, con un borde donde el pigmento se
-   acumulo al levantar el pincel. */
-function dabAt(c,st,asp,ang,x,y,k,salt){
-  var r1=hash(k,salt*11+3),r2=hash(k+91,salt+7),r3=hash(k+17,salt*3+5),r4=hash(k+53,salt*5+1);
-  var R=DAB*(0.78+r2*0.90),a0=ang+(r1-0.5)*0.55;
-  var ca=Math.cos(a0),sa=Math.sin(a0);
-  var n=4+((r4*2.99)|0),qq,px,py,th,rr,xs=[],ys=[];
-  for(qq=0;qq<n;qq++){
-    th=(qq/n)*6.2832+(hash(k*3+qq,salt)-0.5)*0.78;
-    rr=R*(0.56+hash(k*7+qq,salt+3)*0.86);
-    px=Math.cos(th)*rr*asp;py=Math.sin(th)*rr*0.78;
-    xs.push(x+px*ca-py*sa);ys.push(y+px*sa+py*ca);
-  }
-  c.globalAlpha=0.32+r1*0.30;
-  c.fillStyle=st.t[TIDX[(r3*9)|0]];
-  c.beginPath();c.moveTo(xs[0],ys[0]);
-  for(qq=1;qq<n;qq++)c.lineTo(xs[qq],ys[qq]);
-  c.closePath();c.fill();
-  /* el borde por donde se fue la carga */
-  if(r4>0.42){
-    var e=(r3*n)|0;
-    c.globalAlpha=0.26+r2*0.30;
-    c.strokeStyle=cssc(mixc(st.col,SOOT,0.66));
-    c.lineWidth=0.7+r1*1.0;
-    c.beginPath();c.moveTo(xs[e],ys[e]);c.lineTo(xs[(e+1)%n],ys[(e+1)%n]);
-    c.lineTo(xs[(e+2)%n],ys[(e+2)%n]);c.stroke();
-  }
-}
-function paintTo(frac){
-  var target=clamp01(frac),year=Y0+Math.round((Y1-Y0)*target),yi=year-Y0;
-  if(yi<0)yi=0;if(yi>NSER-1)yi=NSER-1;
-  /* Clipping to a country outline is the expensive part of a brush load, so
-     each frame takes only a few countries, picked round-robin. */
-  var budget=380,clips=0,NG=geomsP.length,c2;
-  for(c2=0;c2<NG;c2++){
-    var i=(brushAt+c2)%NG,g=geomsP[i];
-    if(!g.s||!g.end)continue;
-    var want=wantAt(g,yi);
-    if(g.done>=want)continue;
-    ctx.save();ctx.clip(g.path);
-    while(g.done<want&&budget>0){var p=g.pool[g.done];
-      if(p)dabAt(ctx,STEPS[g.dtone[g.done]],g.asp,g.ang,p[0],p[1],g.done,g.iso.length);
-      g.done++;painted++;budget--;}
-    ctx.restore();
-    clips++;
-    if(budget<=0||clips>=5){brushAt=(i+1)%NG;break;}
-  }
-  if(c2>=NG)brushAt=0;
-  var dec=Math.floor(yi/10);
-  if(dec>giornata){
-    giornata=dec;
-    if(dec%2===0){
-      var yy=plot.y+plot.h*(0.06+0.075*(dec%12));
-      ctx.save();ctx.strokeStyle='rgba(120,98,66,.10)';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(plot.x+6,yy+Math.sin(dec)*5);
-      ctx.lineTo(plot.x+plot.w-6,yy-Math.sin(dec*1.7)*6);ctx.stroke();ctx.restore();
-    }
-  }
-  ctx.globalAlpha=1;
-  return year;
-}
-/* la misma pintura, pero de una vez y para un ano cualquiera */
-function paintYear(c,yi){
-  geomsP.forEach(function(g){
-    if(!g.s||!g.end)return;
-    var want=wantAt(g,yi),d;
-    if(want<=0)return;
-    c.save();c.clip(g.path);
-    for(d=0;d<want;d++){var p=g.pool[d];
-      if(p)dabAt(c,STEPS[g.dtone[d]],g.asp,g.ang,p[0],p[1],d,g.iso.length);}
-    c.restore();
-    g.done=want;
-  });
-  c.globalAlpha=1;
-}
-
-/* the biggest producers, lettered into the wall once the paint is on */
-function drawNames(c,yi){
-  c.save();
-  c.font='700 '+(small?10:12)+'px Archivo, Arial, sans-serif';
-  c.textAlign='center';c.textBaseline='middle';
-  geomsP.slice().sort(function(a,b){return b.end-a.end;}).slice(0,small?4:6).forEach(function(g){
-    var cx=(g.bbox[0]+g.bbox[2])/2,cy=(g.bbox[1]+g.bbox[3])/2;
-    if(g.iso==='CHL')cx=g.bbox[0]-22;
-    if(g.iso==='MEX')cy=g.bbox[1]+(g.bbox[3]-g.bbox[1])*0.62;
-    var txt=g.name.toUpperCase(),w=c.measureText(txt).width;
-    c.fillStyle='rgba(240,231,208,.90)';
-    c.fillRect(cx-w/2-5,cy-9,w+10,18);
-    c.fillStyle='rgba(35,26,21,.96)';
-    c.fillText(txt,cx,cy);
-  });
-  c.restore();
-}
-
-/* ---------- la regla del siglo ----------
-   No es una leyenda: es el eje del tiempo del propio muro. Marca donde esta
-   el ano que se ve y es lo que se arrastra para cambiarlo. */
-function xAtYear(yi){return tx0+(yi/(NSER-1))*(tx1-tx0);}
-function yearAtX(x){return Math.round(clamp01((x-tx0)/(tx1-tx0))*(NSER-1));}
-function drawScrub(c,yi){
-  if(!scrubBox)return;
-  var y=scrubBox.y,x0=tx0,w=tx1-tx0,ly=y+16,xm=xAtYear(yi);
-  c.save();c.globalAlpha=1;
-  function stamp(t,xx,yy,al,col){
-    c.fillStyle='rgba(28,21,17,.55)';c.fillText(t,xx+0.9,yy+0.9);
-    c.fillStyle=col;c.fillText(t,xx,yy);
-  }
-  c.fillStyle='rgba(28,21,17,.34)';c.fillRect(x0,ly+1,w,1.5);
-  c.fillStyle='rgba(243,235,214,.55)';c.fillRect(x0,ly,w,1.5);
-  c.fillStyle='rgba(170,52,46,.92)';c.fillRect(x0,ly-0.5,xm-x0,3);
-  c.font='700 '+(small?9:10.5)+'px Archivo, Arial, sans-serif';
-  c.textBaseline='top';
-  var marks=small?[1900,1950,2000]:[1900,1925,1950,1975,2000];
-  marks.forEach(function(yr,k){
-    var xx=xAtYear(yr-Y0);
-    c.fillStyle='rgba(28,21,17,.40)';c.fillRect(Math.round(xx)+0.5,ly-6,1,6);
-    c.fillStyle='rgba(243,235,214,.55)';c.fillRect(Math.round(xx)-0.5,ly-6,1,6);
-    if(Math.abs(xx-xm)<(small?30:36))return;
-    c.textAlign=k===0?'left':'center';
-    stamp(yr,xx,ly+5,1,'rgba(244,236,216,.92)');
-  });
-  /* el cursor: un cuadrado, como todo aqui */
-  var cx=Math.min(Math.max(xm,x0+2),x0+w-2);
-  c.fillStyle='rgba(28,21,17,.45)';c.fillRect(Math.round(cx)-4,ly-7,9,13);
-  c.fillStyle='rgba(178,54,46,.98)';c.fillRect(Math.round(cx)-5,ly-8,9,13);
-  c.fillStyle='rgba(243,235,214,.95)';c.fillRect(Math.round(cx)-2.5,ly-5,3,7);
-  c.font='700 '+(small?12:14)+'px Archivo, Arial, sans-serif';
-  c.textAlign=(cx>x0+w-52)?'right':(cx<x0+52?'left':'center');
-  stamp(Y0+yi,cx,ly+5,1,'rgba(238,168,150,.98)');
-  if(small&&!everScrubbed){
-    c.font='700 8.5px Archivo, Arial, sans-serif';
-    c.textAlign='left';c.textBaseline='bottom';
-    stamp('ARRASTRA ↔ PARA RECORRER EL SIGLO',x0,ly-10,1,'rgba(240,230,208,.85)');
-  }
-  c.restore();
-}
-
-/* ---------- overlay: the year, the caption ---------- */
-function overlay(year,caption){
-  if(!ovDirty)octx.clearRect(0,0,VW,VH);
-  else octx.clearRect(ovDirty[0],ovDirty[1],ovDirty[2],ovDirty[3]);
-  ovDirty=[plot.x-4,plot.y-4,plot.w+8,(small?40:62)];
-  octx.save();
-  octx.textAlign='right';octx.textBaseline='top';
-  octx.font='700 '+(small?26:44)+'px Archivo, Arial, sans-serif';
-  octx.fillStyle='rgba(154,43,43,.85)';
-  octx.fillText(year,plot.x+plot.w-4,plot.y+2);
-  if(caption){
-    octx.font='600 '+(small?10:12.5)+'px Archivo, Arial, sans-serif';
-    octx.textAlign='left';octx.textBaseline='bottom';
-    var cy=plot.y+(small?16:20),cw=octx.measureText(caption).width,ch=small?13:16;
-    octx.fillStyle='rgba(237,226,199,.80)';
-    octx.fillRect(plot.x+2,cy-ch,cw+9,ch+4);
-    octx.fillStyle='rgba(110,92,72,.98)';
-    octx.fillText(caption,plot.x+6,cy);
-  }
-  octx.restore();
-}
-
-/* ------------------------------------------------------------------
-   Terminado el fresco, el muro responde. Arrastrar de izquierda a derecha
-   -con el raton o con el dedo- recorre el siglo y repinta el continente ano
-   a ano. Pasar el cursor o tocar un pais lo enciende, apaga el resto y abre
-   una ficha con lo que produce, lo que pesa en la region y su rendimiento.
-   ------------------------------------------------------------------ */
-var wallLayer=null,wallOK=false,hoverG=null;
-var COARSE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-window.__hoverInfo=null;window.__year=0;window.__renderMs=0;
-function snapshotWall(){
-  if(!wallLayer)wallLayer=document.createElement('canvas');
-  if(wallLayer.width!==cv.width||wallLayer.height!==cv.height){
-    wallLayer.width=cv.width;wallLayer.height=cv.height;}
-  var g=wallLayer.getContext('2d');
-  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,wallLayer.width,wallLayer.height);
-  g.drawImage(cv,0,0);
-  wallOK=true;
-}
-/* el muro sin pintura: cuadriculado, figura de fondo, costa y sinopia */
+/* ---------- base layer: graticule, oceans, sinopia of every border ---------- */
 function buildBase(){
   if(!baseLayer)baseLayer=document.createElement('canvas');
-  if(baseLayer.width!==cv.width||baseLayer.height!==cv.height){
-    baseLayer.width=cv.width;baseLayer.height=cv.height;}
-  var g=baseLayer.getContext('2d');
-  g.setTransform(dpr,0,0,dpr,0,0);
-  g.clearRect(0,0,VW,VH);
-  g.drawImage(gratLayer,0,0,VW,VH);
-  g.drawImage(shadeLayer,0,0,VW,VH);
-  if(pacS.length)strokeSinopiaLine(g,pacS,M,true,true);
-  inkSegs(g,0,NSEG);
+  baseLayer.width=cv.width;baseLayer.height=cv.height;
+  var g=baseLayer.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,MW,MH);
+  g.lineJoin='round';g.lineCap='round';
+  var lon,lat,first,p;
+  g.strokeStyle='rgba(181,80,47,.26)';g.lineWidth=1;
+  for(lon=-165;lon<=15;lon+=15){g.beginPath();first=true;
+    for(lat=-80;lat<=55;lat+=2){p=P(proj(lon,lat));if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();}
+  for(lat=-75;lat<=50;lat+=15){g.beginPath();first=true;
+    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,lat));if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();}
+  g.strokeStyle='rgba(181,80,47,.42)';g.lineWidth=1.3;
+  [-23.44,0,23.44].forEach(function(la){g.beginPath();first=true;
+    for(lon=-170;lon<=20;lon+=2){p=P(proj(lon,la));if(first){g.moveTo(p[0],p[1]);first=false;}else g.lineTo(p[0],p[1]);}
+    g.stroke();});
+  if(!small){
+    g.font='700 12px Archivo, Arial, sans-serif';g.fillStyle='rgba(116,96,72,.62)';g.textAlign='center';g.textBaseline='middle';
+    [[-112,-38,'O C É A N O   P A C Í F I C O'],[-24,-30,'O C É A N O   A T L Á N T I C O']].forEach(function(o){
+      var q2=P(proj(o[0],o[1])),tw=g.measureText(o[2]).width/2;
+      if(q2[0]-tw>6&&q2[0]+tw<MW-6&&q2[1]>40&&q2[1]<MH-20)g.fillText(o[2],q2[0],q2[1]);});
+  }
+  /* sinopia: the drawing under the paint */
+  g.lineCap='round';
+  for(var i=0;i<segs.length;i++){var s=segs[i],w=0.9+hash(i,1)*1.5,a=0.22+hash(i,2)*0.36;
+    var jx=(hash(i,3)-0.5)*1.4,jy=(hash(i,4)-0.5)*1.4;
+    g.strokeStyle='rgba(181,80,47,'+a.toFixed(2)+')';g.lineWidth=w;
+    g.beginPath();g.moveTo(s[0][0]+jx,s[0][1]+jy);g.lineTo(s[1][0]+jx*0.6,s[1][1]+jy*0.6);g.stroke();}
 }
-function renderWall(yi){
-  var t=performance.now();
-  if(!baseLayer)buildBase();
+
+/* ---------- brush loads: a luminance texture that grows with production ---------- */
+function dabAt(c,asp,ang,x,y,k,salt){
+  var r1=hash(k,salt*11+3),r2=hash(k+91,salt+7),r3=hash(k+17,salt*3+5),r4=hash(k+53,salt*5+1);
+  var R=DAB*(0.78+r2*0.90),a0=ang+(r1-0.5)*0.55,ca=Math.cos(a0),sa=Math.sin(a0);
+  var n=4+((r4*2.99)|0),qq,px,py,th,rr,xs=[],ys=[];
+  for(qq=0;qq<n;qq++){th=(qq/n)*6.2832+(hash(k*3+qq,salt)-0.5)*0.78;rr=R*(0.56+hash(k*7+qq,salt+3)*0.86);
+    px=Math.cos(th)*rr*asp;py=Math.sin(th)*rr*0.78;xs.push(x+px*ca-py*sa);ys.push(y+px*sa+py*ca);}
+  if(r3<0.55){c.fillStyle='rgba(40,30,24,'+(0.09+r1*0.13).toFixed(3)+')';}
+  else{c.fillStyle='rgba(255,250,236,'+(0.14+r1*0.16).toFixed(3)+')';}
+  c.beginPath();c.moveTo(xs[0],ys[0]);for(qq=1;qq<n;qq++)c.lineTo(xs[qq],ys[qq]);c.closePath();c.fill();
+  if(r4>0.5){var e=(r3*n)|0;c.strokeStyle='rgba(40,30,24,'+(0.12+r2*0.16).toFixed(3)+')';c.lineWidth=0.7+r1*0.9;
+    c.beginPath();c.moveTo(xs[e],ys[e]);c.lineTo(xs[(e+1)%n],ys[(e+1)%n]);c.lineTo(xs[(e+2)%n],ys[(e+2)%n]);c.stroke();}
+}
+function ensureDabs(yi){
+  var back=false,i,g;
+  for(i=0;i<geoms.length;i++){g=geoms[i];if(wantAt(g,yi)<g.done){back=true;break;}}
+  if(back){dctx.clearRect(0,0,MW,MH);for(i=0;i<geoms.length;i++)geoms[i].done=0;}
+  for(i=0;i<geoms.length;i++){g=geoms[i];var want=wantAt(g,yi);if(want<=g.done)continue;
+    dctx.save();dctx.clip(g.path);
+    while(g.done<want){var p=g.pool[g.done];if(p)dabAt(dctx,g.asp,g.ang,p[0],p[1],g.done,g.iso.length);g.done++;}
+    dctx.restore();}
+}
+function drawContours(c){
+  c.save();c.lineJoin='round';
+  geoms.forEach(function(g){
+    c.strokeStyle='rgba(22,17,14,0.28)';c.lineWidth=small?2.8:4;c.stroke(g.path);
+    c.strokeStyle='rgba(19,15,13,0.88)';c.lineWidth=small?1.3:2;c.stroke(g.path);});
+  c.restore();
+}
+var NAMED=geoms.filter(function(g){return g.has;}).sort(function(a,b){return b.end-a.end;}).slice(0,6);
+function drawNames(c){
+  c.save();c.font='700 '+(small?10:11.5)+'px Archivo, Arial, sans-serif';c.textAlign='center';c.textBaseline='middle';
+  /* a name never sits under the tooltip: text on text is not allowed here */
+  var tb=tip.hidden?null:[tip.offsetLeft-4,tip.offsetTop-4,tip.offsetLeft+tip.offsetWidth+4,tip.offsetTop+tip.offsetHeight+4];
+  NAMED.slice(0,small?3:6).forEach(function(g){
+    var x=g.cx,y=g.cy;
+    if(g.iso==='MEX'){x=g.bbox[0]+(g.bbox[2]-g.bbox[0])*0.58;y=g.bbox[1]+(g.bbox[3]-g.bbox[1])*0.5;}
+    if(g.iso==='ARG'){x=g.bbox[0]+(g.bbox[2]-g.bbox[0])*0.55;}
+    var txt=g.name.toUpperCase(),w=c.measureText(txt).width;
+    if(tb&&x+w/2+5>tb[0]&&x-w/2-5<tb[2]&&y+8>tb[1]&&y-8<tb[3])return;
+    c.fillStyle='rgba(240,231,208,.90)';c.fillRect(x-w/2-5,y-8,w+10,16);
+    c.fillStyle='rgba(35,26,21,.96)';c.fillText(txt,x,y);});
+  c.restore();
+}
+
+/* ---------- the map for one year ---------- */
+function renderMap(yi){
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalAlpha=1;
-  ctx.clearRect(0,0,VW,VH);
-  ctx.drawImage(baseLayer,0,0,VW,VH);
-  paintYear(ctx,yi);
+  ctx.clearRect(0,0,MW,MH);
+  ctx.drawImage(baseLayer,0,0,MW,MH);
+  geoms.forEach(function(g){
+    if(g.has){ctx.fillStyle=cssc(colorOf(g,yi),0.82);ctx.fill(g.path);}
+    else{ctx.fillStyle='rgba(237,226,199,.5)';ctx.fill(g.path);ctx.fillStyle=hatch;ctx.fill(g.path);}
+  });
+  ensureDabs(yi);
+  ctx.drawImage(dabLayer,0,0,MW,MH);
   drawContours(ctx);
-  drawNames(ctx,yi);
-  drawScrub(ctx,yi);
-  snapshotWall();
-  curYi=yi;window.__year=Y0+yi;
-  window.__renderMs=Math.round(performance.now()-t);
+  if(pinned){ctx.save();ctx.lineJoin='round';ctx.strokeStyle='rgba(244,235,214,.9)';ctx.lineWidth=small?5:7;ctx.stroke(pinned.path);
+    ctx.strokeStyle='#2F6B5B';ctx.lineWidth=small?2.6:3.4;ctx.stroke(pinned.path);ctx.restore();}
+  if(hoverG&&hoverG!==pinned){ctx.save();ctx.lineJoin='round';ctx.strokeStyle='rgba(244,235,214,.9)';ctx.lineWidth=small?4:5.5;ctx.stroke(hoverG.path);
+    ctx.strokeStyle='rgba(19,15,13,.98)';ctx.lineWidth=small?2:2.8;ctx.stroke(hoverG.path);ctx.restore();}
+  drawNames(ctx);
 }
-function miles(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
-function dec1(n){return (Math.round(n*10)/10).toLocaleString('es-ES');}
+
+/* ---------- the series ---------- */
+function niceTicks(max,n){var raw=max/n,p=Math.pow(10,Math.floor(Math.log(raw)/Math.LN10)),m=raw/p,st=(m>=5?5:m>=2?2:1)*p,out=[];
+  for(var v=0;v<=max+1e-9;v+=st)out.push(v);return out;}
+function renderChart(yi){
+  var c=cx,x0=chart.x0,x1=chart.x1,y0=chart.y0,y1=chart.y1,j;
+  c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,CW,CH);
+  var ymax=totMax*1.06;
+  function Y(v){return y0-(v/ymax)*(y0-y1);}
+  /* grid + left axis (Mt) */
+  c.font='600 '+(small?10:11)+'px Archivo, Arial, sans-serif';c.textBaseline='middle';c.textAlign='right';
+  niceTicks(totMax,3).forEach(function(v){var yy=Y(v);
+    c.strokeStyle='rgba(35,26,21,.16)';c.lineWidth=1;c.beginPath();c.moveTo(x0,Math.round(yy)+.5);c.lineTo(x1,Math.round(yy)+.5);c.stroke();
+    c.fillStyle='#54443A';c.fillText(v?miles(v/1e6):'0',x0-6,yy);});
+  c.strokeStyle='rgba(35,26,21,.55)';c.lineWidth=1;
+  c.beginPath();c.moveTo(x0+.5,y1);c.lineTo(x0+.5,y0+.5);c.lineTo(x1,y0+.5);c.stroke();
+  c.textAlign='left';c.textBaseline='bottom';c.fillStyle='#54443A';c.fillText('Mt',x0+4,y1+2);
+  /* x axis */
+  c.textAlign='center';c.textBaseline='top';
+  var marks=small?[1900,1950,2000,Y1]:[1900,1925,1950,1975,2000,Y1];
+  marks.forEach(function(yr){var xx=xAtYear(yr-Y0);
+    c.strokeStyle='rgba(35,26,21,.55)';c.beginPath();c.moveTo(Math.round(xx)+.5,y0);c.lineTo(Math.round(xx)+.5,y0+4);c.stroke();
+    c.textAlign=yr===Y0?'left':(yr===Y1?'right':'center');c.fillStyle='#54443A';c.fillText(yr,xx,y0+6);});
+  /* the whole series as a ghost, the part up to the year as paint */
+  c.save();c.lineJoin='round';c.lineCap='round';
+  c.strokeStyle='rgba(35,26,21,.28)';c.lineWidth=1;c.setLineDash([3,3]);
+  c.beginPath();for(j=0;j<NSER;j++){var gx=xAtYear(j),gy=Y(TOT[j]);if(j)c.lineTo(gx,gy);else c.moveTo(gx,gy);}c.stroke();
+  c.setLineDash([]);
+  c.beginPath();c.moveTo(x0,y0);
+  for(j=0;j<=yi;j++)c.lineTo(xAtYear(j),Y(TOT[j]));
+  c.lineTo(xAtYear(yi),y0);c.closePath();c.fillStyle='rgba(181,80,47,.22)';c.fill();
+  c.strokeStyle='#B5502F';c.lineWidth=2.4;c.beginPath();
+  for(j=0;j<=yi;j++){if(j)c.lineTo(xAtYear(j),Y(TOT[j]));else c.moveTo(xAtYear(j),Y(TOT[j]));}c.stroke();
+  /* the pinned country on its own right axis */
+  var pv=null;
+  if(pinned&&pinned.has){
+    var pmax=0;for(j=0;j<NSER;j++)if(pinned.s[j]>pmax)pmax=pinned.s[j];pmax*=1.06;
+    var Yp=function(v){return y0-(v/pmax)*(y0-y1);};
+    c.strokeStyle='rgba(47,107,91,.55)';c.lineWidth=1;c.beginPath();c.moveTo(x1+.5,y1);c.lineTo(x1+.5,y0);c.stroke();
+    c.font='600 '+(small?10:11)+'px Archivo, Arial, sans-serif';c.textAlign='left';c.textBaseline='middle';c.fillStyle='#2F6B5B';
+    niceTicks(pmax/1.06,2).forEach(function(v){var yy=Yp(v);
+      c.beginPath();c.moveTo(x1,Math.round(yy)+.5);c.lineTo(x1+4,Math.round(yy)+.5);c.stroke();
+      c.fillText(v?(v>=1e8?miles(v/1e6):dec1(v/1e6)):'0',x1+6,yy);});
+    c.textBaseline='bottom';c.fillText('Mt',x1+6,y1+2);
+    c.strokeStyle='rgba(47,107,91,.45)';c.lineWidth=1.2;c.setLineDash([3,3]);
+    c.beginPath();for(j=0;j<NSER;j++){var qx=xAtYear(j),qy=Yp(pinned.s[j]);if(j)c.lineTo(qx,qy);else c.moveTo(qx,qy);}c.stroke();
+    c.setLineDash([]);
+    c.strokeStyle='#2F6B5B';c.lineWidth=2.2;c.beginPath();
+    for(j=0;j<=yi;j++){if(j)c.lineTo(xAtYear(j),Yp(pinned.s[j]));else c.moveTo(xAtYear(j),Yp(pinned.s[j]));}c.stroke();
+    pv={x:xAtYear(yi),y:Yp(pinned.s[yi]),v:pinned.s[yi]};
+  }
+  /* cursor: the year and its value */
+  var cxx=xAtYear(yi),cyy=Y(TOT[yi]);
+  c.strokeStyle='rgba(154,43,43,.75)';c.lineWidth=1;c.beginPath();c.moveTo(Math.round(cxx)+.5,y1);c.lineTo(Math.round(cxx)+.5,y0);c.stroke();
+  function dot(x,y,col){c.fillStyle='#F4EBD6';c.beginPath();c.arc(x,y,5,0,6.2832);c.fill();c.fillStyle=col;c.beginPath();c.arc(x,y,3.2,0,6.2832);c.fill();}
+  function plate(txt,x,y,col,left){c.font='700 '+(small?11:12)+'px Archivo, Arial, sans-serif';
+    var w=c.measureText(txt).width+10,h=small?16:18,bx=left?x-w-8:x+8;bx=clamp(bx,x0,x1-w);var by=clamp(y-h/2,y1,y0-h);
+    c.fillStyle='rgba(244,235,214,.96)';c.fillRect(bx,by,w,h);c.strokeStyle=col;c.lineWidth=1.2;c.strokeRect(bx+.5,by+.5,w-1,h-1);
+    c.fillStyle=col;c.textAlign='left';c.textBaseline='middle';c.fillText(txt,bx+5,by+h/2);}
+  /* the two value plates sit on opposite sides of the cursor, so they never collide */
+  var left=cxx>(x0+x1)*0.6;
+  dot(cxx,cyy,'#B5502F');
+  plate(mt(TOT[yi]),cxx,cyy,'#7A2F14',left);
+  if(pv){dot(pv.x,pv.y,'#2F6B5B');plate(mt(pv.v),pv.x,pv.y,'#2F6B5B',!left);}
+  c.restore();
+}
+
+/* ---------- labels, legend, tooltip ---------- */
+function updateRot(){
+  var m=MODES[mode];
+  rotMap.innerHTML=m.title+' <span class="u">· '+m.unit+' ·</span> <span class="yr">'+(Y0+curYi)+'</span>';
+  var h='Producción agraria de América Latina <span class="u"><span class="l">· millones de toneladas (Mt) · </span><span class="s">· Mt · </span>'+Y0+'–'+Y1+'</span>';
+  if(pinned){h+='<span class="pin">'+pinned.name+' <span class="u">· Mt · eje derecho</span></span>'+
+    '<button type="button" class="unpin" id="unpin" aria-label="Soltar '+pinned.name+'">×</button>';}
+  rotChart.innerHTML=h;
+  var ub=$('unpin');if(ub)ub.addEventListener('click',function(e){e.stopPropagation();setPinned(null);});
+}
+function updateLegend(){
+  var m=MODES[mode];legTitle.textContent=m.legend;
+  var stops=RAMP.map(function(c,i){return cssc(c)+' '+Math.round(i/(RAMP.length-1)*100)+'%';}).join(',');
+  legRamp.style.background='linear-gradient(90deg,'+stops+')';
+  legRamp.innerHTML=m.ticks.map(function(v){var u=(Math.log(v)-m.lo)/(m.hi-m.lo);
+    var lab=mode==='prod'?(v>=1e8?miles(v/1e6):dec1(v/1e6)):(v>=10?String(v):dec1(v));
+    return '<i style="left:'+(u*100).toFixed(1)+'%">'+lab+'</i>';}).join('');
+  legNote.innerHTML=m.note+' <b>Suma regional: '+NCTRY+' países.</b>';
+  document.querySelectorAll('.mode button').forEach(function(b){var on=b.dataset.mode===mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+}
+var tipAt=null;
+function showTip(g,x,y,anchored){
+  if(!g){tip.hidden=true;window.__hoverInfo=null;return;}
+  var yi=curYi,h='<b>'+g.name+'</b>';
+  if(g.has){
+    var prod=g.s[yi],yv=g.y?g.y[yi]:0,share=TOT[yi]>0?prod/TOT[yi]:0;
+    h+='<span class="v">'+mt(prod)+' <span style="font-weight:500">en '+(Y0+yi)+'</span></span>';
+    if(yv>0)h+='<span class="s">'+dec1(yv)+' t/ha de rendimiento</span>';
+    h+='<span class="s">'+pct(share)+' de la producción regional</span>';
+    if(g===pinned)h+='<span class="h">Serie fijada · clic fuera o Esc para soltar</span>';
+    else h+='<span class="h">'+(COARSE?'Toca de nuevo para fijar su serie':'Clic para fijar su serie')+'</span>';
+    window.__hoverInfo={iso:g.iso,name:g.name,year:Y0+yi,mt:Math.round(prod/1e6),tha:yv?Math.round(yv*10)/10:null};
+  }else{h+='<span class="s">Sin serie de producción en el atlas</span>';window.__hoverInfo={iso:g.iso,name:g.name,year:Y0+yi,mt:null,tha:null};}
+  tip.innerHTML=h;tip.classList.toggle('pinned',g===pinned);tip.hidden=false;
+  /* never over the label row at the top of the map: text on text is not allowed */
+  var w=tip.offsetWidth,hh=tip.offsetHeight,bx,by,top=rotInset+2;
+  if(anchored){bx=x-w/2;by=y-hh-14;if(by<top)by=y+18;}
+  else{bx=x+16;by=y-hh-12;if(bx+w>MW-6)bx=x-w-16;if(by<top)by=y+18;}
+  bx=clamp(bx,4,Math.max(4,MW-w-4));by=clamp(by,top,Math.max(top,MH-hh-4));
+  tip.style.left=Math.round(bx)+'px';tip.style.top=Math.round(by)+'px';
+  tipAt={g:g,x:x,y:y,anchored:anchored};
+}
+function refreshTip(){if(tipAt&&!tip.hidden)showTip(tipAt.g,tipAt.x,tipAt.y,tipAt.anchored);}
+
+/* ---------- render + year ---------- */
+function requestRender(){if(rafR)return;rafR=requestAnimationFrame(render);}
+function render(){rafR=0;renderMap(curYi);renderChart(curYi);updateRot();refreshTip();}
+function setYear(yi,force){
+  yi=clamp(Math.round(yi),0,NSER-1);
+  if(yi===curYi&&!force)return;
+  curYi=yi;window.__year=Y0+yi;
+  slider.value=Y0+yi;slider.setAttribute('aria-valuetext',String(Y0+yi));yearbig.textContent=Y0+yi;
+  var ys=rotMap.querySelector('.yr');if(ys)ys.textContent=Y0+yi;   /* same frame as the big year */
+  requestRender();
+}
+function setPinned(g){
+  pinned=g;window.__pinned=g?g.iso:null;
+  layout();
+  if(!g){if(hoverG&&tipAt)showTip(hoverG,tipAt.x,tipAt.y,tipAt.anchored);else showTip(null);}
+  requestRender();
+}
+
+/* ---------- play / pause / intro ---------- */
+var frames=0,fpsT=0;
+function stopPlay(){playing=false;intro=false;window.__playing=false;window.__introDone=true;
+  playBtn.classList.remove('on');playBtn.setAttribute('aria-pressed','false');playBtn.setAttribute('aria-label','Reproducir');
+  if(rafP){cancelAnimationFrame(rafP);rafP=0;}}
+function startPlay(isIntro){
+  if(curYi>=NSER-1&&!isIntro)setYear(0,true);
+  playing=true;intro=!!isIntro;window.__playing=true;
+  rate=isIntro?(NSER-1)/6.0:16;acc=0;lastTs=0;frames=0;fpsT=0;
+  playBtn.classList.add('on');playBtn.setAttribute('aria-pressed','true');playBtn.setAttribute('aria-label','Pausar');
+  if(!rafP)rafP=requestAnimationFrame(playTick);
+}
+function playTick(ts){
+  rafP=0;if(!playing)return;
+  if(!lastTs){lastTs=ts;fpsT=ts;}
+  frames++;if(ts-fpsT>=500){window.__fps=Math.round(frames*1000/(ts-fpsT));frames=0;fpsT=ts;}
+  acc+=((ts-lastTs)/1000)*rate;lastTs=ts;
+  var step=Math.floor(acc);
+  if(step>0){acc-=step;setYear(curYi+step);}
+  if(curYi>=NSER-1){stopPlay();return;}
+  rafP=requestAnimationFrame(playTick);
+}
+playBtn.addEventListener('click',function(){if(playing)stopPlay();else startPlay(false);});
+slider.addEventListener('input',function(){if(playing)stopPlay();setYear(parseInt(slider.value,10)-Y0);});
+document.querySelectorAll('.mode button').forEach(function(b){b.addEventListener('click',function(){
+  mode=b.dataset.mode;updateLegend();requestRender();});});
+
+/* ---------- pointer: hover, click to pin, drag to scrub ---------- */
 function pickCountry(x,y){
-  if(!finished||!wallOK)return null;
   var i,g;
-  for(i=0;i<geomsP.length;i++){g=geomsP[i];
-    if(g.end&&hitCtx.isPointInPath(g.path,x,y))return g;}
+  for(i=0;i<geoms.length;i++){g=geoms[i];if(hitCtx.isPointInPath(g.path,x,y))return g;}
   if(!COARSE)return null;
-  /* con el dedo, 44 px de alcance hasta el pais mas proximo */
-  var best=null,bd=44;
-  for(i=0;i<geomsP.length;i++){g=geomsP[i];if(!g.end)continue;
-    var b=g.bbox,dx=x<b[0]?b[0]-x:(x>b[2]?x-b[2]:0),dy=y<b[1]?b[1]-y:(y>b[3]?y-b[3]:0);
-    var d=Math.sqrt(dx*dx+dy*dy);
-    if(d<bd){bd=d;best=g;}}
+  var best=null,bd=30;
+  for(i=0;i<geoms.length;i++){g=geoms[i];var b=g.bbox,dx=x<b[0]?b[0]-x:(x>b[2]?x-b[2]:0),dy=y<b[1]?b[1]-y:(y>b[3]?y-b[3]:0);
+    var d=Math.sqrt(dx*dx+dy*dy);if(d<bd){bd=d;best=g;}}
   return best;
 }
-function hoverCard(g,mx,my){
-  var yi=curYi,pad=11,fs=small?11:12.5;
-  var prod=g.s?g.s[yi]:0, ar=(g.a&&g.a[yi]>0)?g.a[yi]:0;
-  var L1=g.name.toUpperCase();
-  var L2=miles(prod/1e6)+' Mt en '+(Y0+yi);
-  var L3=totalEnd>0?(Math.round(prod/sumYear(yi)*1000)/10+'% de la región'):'';
-  var L4=ar?(dec1(prod/ar)+' t por hectárea'):'';
-  var g0=g.s&&g.s[0]>0?prod/g.s[0]:0;
-  var L5=g0>1.5?('× '+Math.round(g0)+' desde 1900'):'';
-  window.__hoverInfo={iso:g.iso,name:g.name,year:Y0+yi,
-    mt:Math.round(prod/1e6),tha:ar?Math.round(prod/ar*10)/10:null};
-  octx.save();
-  octx.font='700 '+(fs+1.5)+'px Archivo, Arial, sans-serif';
-  var w=octx.measureText(L1).width;
-  octx.font='400 '+fs+'px Archivo, Arial, sans-serif';
-  [L2,L3,L4,L5].forEach(function(t){if(t)w=Math.max(w,octx.measureText(t).width);});
-  var lines=1+(L2?1:0)+(L3?1:0)+(L4?1:0)+(L5?1:0);
-  var bw=w+pad*2,bh=pad*2+(fs+2)+6+fs*1.45*(lines-1);
-  var bx,by;
-  if(COARSE){bx=plot.x+6;by=plot.y+6;}
-  else{
-    bx=mx+16;by=my-bh-14;
-    if(bx+bw>VW-10)bx=mx-bw-16;
-    if(bx<6)bx=6;
-    if(by<6)by=my+20;
-    if(by+bh>scrubBox.y-8)by=Math.max(6,scrubBox.y-8-bh);
-  }
-  octx.fillStyle='rgba(240,232,212,0.95)';octx.fillRect(bx,by,bw,bh);
-  octx.strokeStyle='rgba(19,15,13,0.92)';octx.lineWidth=2;
-  octx.strokeRect(bx+1,by+1,bw-2,bh-2);
-  octx.textAlign='left';octx.textBaseline='top';
-  octx.font='700 '+(fs+1.5)+'px Archivo, Arial, sans-serif';
-  octx.fillStyle='rgba(24,18,15,0.98)';octx.fillText(L1,bx+pad,by+pad);
-  var ly=by+pad+fs+8;
-  octx.font='400 '+fs+'px Archivo, Arial, sans-serif';
-  octx.fillStyle='rgba(45,35,28,0.95)';octx.fillText(L2,bx+pad,ly);ly+=fs*1.45;
-  if(L3){octx.fillStyle='rgba(90,74,60,0.95)';octx.fillText(L3,bx+pad,ly);ly+=fs*1.45;}
-  if(L4){octx.fillStyle=cssc(mixc(STEPS[g.tone[yi]].col,SOOT,0.25));
-    octx.font='700 '+fs+'px Archivo, Arial, sans-serif';
-    octx.fillText(L4,bx+pad,ly);ly+=fs*1.45;
-    octx.font='400 '+fs+'px Archivo, Arial, sans-serif';}
-  if(L5){octx.fillStyle='rgba(154,43,43,0.95)';octx.fillText(L5,bx+pad,ly);}
-  octx.restore();
-}
-var sumCache={};
-function sumYear(yi){
-  if(sumCache[yi]!=null)return sumCache[yi];
-  var s=0;geomsP.forEach(function(g){if(g.s)s+=g.s[yi];});
-  if(!s)s=1;sumCache[yi]=s;return s;
-}
-function drawHover(g,mx,my){
-  if(!finished||!wallOK)return;
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.globalAlpha=1;
-  ctx.clearRect(0,0,VW,VH);
-  ctx.drawImage(wallLayer,0,0,VW,VH);
-  octx.clearRect(0,0,VW,VH);ovDirty=null;
-  if(!g){window.__hoverInfo=null;overlay(Y0+curYi,capNow());return;}
-  /* el muro se apaga, menos el pais que se mira */
-  ctx.fillStyle='rgba(237,226,199,0.66)';ctx.fillRect(0,0,VW,VH);
-  ctx.save();ctx.clip(g.path);ctx.drawImage(wallLayer,0,0,VW,VH);ctx.restore();
-  ctx.save();ctx.lineJoin='round';
-  ctx.strokeStyle='rgba(19,15,13,0.95)';ctx.lineWidth=small?2.4:3.4;ctx.stroke(g.path);
-  ctx.restore();
-  overlay(Y0+curYi,'');
-  hoverCard(g,mx,my);
-}
-var hovRaf=0,pX=0,pY=0,pHas=false;
-function schedule(){
-  if(hovRaf)return;
-  hovRaf=requestAnimationFrame(function(){
-    hovRaf=0;
-    if(scrubbing)return;
-    var g=pHas?pickCountry(pX,pY):null;
-    if(g===hoverG&&!(g&&!COARSE))return;
-    hoverG=g;drawHover(g,pX,pY);
-  });
-}
-function onWall(e){
-  return !(e.target&&e.target.closest&&e.target.closest('a,button,.col,.rail'));
-}
-function onPoint(e){
-  if(!finished||scrubbing)return;
-  if(!onWall(e)){if(pHas){pHas=false;hoverG=undefined;schedule();}return;}
-  pHas=true;pX=e.clientX;pY=e.clientY;schedule();
-}
-function clearHover(){if(!finished||!pHas)return;pHas=false;hoverG=undefined;schedule();}
-
-/* ---------- recorrer el siglo ---------- */
-var scrubbing=false,scrubCand=false,downX=0,downY=0,scrubRaf=0,pendYi=-1;
-function setYear(yi,force){
-  yi=yi<0?0:(yi>NSER-1?NSER-1:yi);
-  if(yi===curYi&&!force)return;
-  pendYi=yi;
-  if(scrubRaf)return;
-  scrubRaf=requestAnimationFrame(function(){
-    scrubRaf=0;
-    var y=pendYi;pendYi=-1;
-    if(y<0||!finished)return;
-    hoverG=null;window.__hoverInfo=null;
-    renderWall(y);
-    ovDirty=null;
-    overlay(Y0+y,capNow());
-    if(scrubbing)guide(y);
-  });
-}
-function guide(yi){
-  var x=xAtYear(yi);
-  octx.save();
-  octx.strokeStyle='rgba(154,43,43,.35)';octx.lineWidth=1;
-  octx.beginPath();octx.moveTo(Math.round(x)+.5,plot.y-6);
-  octx.lineTo(Math.round(x)+.5,scrubBox.y+8);octx.stroke();
-  octx.restore();
-}
-function capNow(){
-  return small?'Cobertura: producción · Tono: t/ha'
-              :'Cuánto cubre cada país es su producción; el tono, sus toneladas por hectárea';
-}
-
-/* ---------- run ---------- */
-var t0=0,finished=false,raf=0,frames=0,fpsT=0;
-var CAP_A='La producción agraria de la región, 1900 → 2023',
-    CAP_B='…y ese perfil es la costa atlántica de Brasil';
-
-function finish(){
-  if(finished||!plot||!gratLayer)return;
-  finished=true;
-  drawnSeg=NSEG;painted=0;giornata=-1;contoursDrawn=true;namesDrawn=true;scrubDrawn=true;
-  buildBase();
-  renderWall(NSER-1);
-  ovDirty=null;
-  overlay(Y1,capNow());
-  body.classList.add('done');
-  if(raf){cancelAnimationFrame(raf);raf=0;}
-}
-
-function tick(ts){
-  if(!t0){t0=ts;fpsT=ts;}
-  frames++;
-  if(ts-fpsT>=500){window.__fps=Math.round(frames*1000/(ts-fpsT));frames=0;fpsT=ts;}
-  var el=(ts-t0)/1000;
-  if(el<FOLD_END){
-    ctx.clearRect(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);
-    var u=el<CHART_END?0:(el-CHART_END)/(FOLD_END-CHART_END);
-    var grow=el<CHART_END?clamp01(el/CHART_END):1;
-    /* the graticule comes up under the curve as it folds into a map */
-    if(u>0){ctx.save();ctx.globalAlpha=clamp01((u-0.25)/0.55);
-      blitGrat(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);
-      blitShade(plot.x-46,plot.y-46,plot.w+92,(railY-plot.y)+50);ctx.restore();}
-    var pts=foldPts(u);
-    chartWash(grow,clamp01(el/0.35)*(1-clamp01(u/0.30)));
-    chartFrame(clamp01(el/0.4)*(1-clamp01(u/0.42)),grow);
-    strokeSinopiaLine(ctx,pts,Math.max(2,Math.round(M*grow)),u>0.85,true);
-    var yr=Y0+Math.round((Y1-Y0)*(el<CHART_END?grow:1));
-    overlay(yr,u<0.5?CAP_A:CAP_B);
-  }else if(el<DRAW_END){
-    if(!coastDone){ctx.clearRect(0,0,VW,VH);
-      ctx.drawImage(gratLayer,0,0,VW,VH);
-      ctx.drawImage(shadeLayer,0,0,VW,VH);
-      strokeSinopiaLine(ctx,pacS,M,true,true);coastDone=true;}
-    sinopiaTo(Math.round(NSEG*clamp01((el-FOLD_END)/(DRAW_END-FOLD_END))));
-    overlay(Y0,CAP_B);
-  }else{
-    sinopiaTo(NSEG);
-    var w=clamp01((el-DRAW_END)/(PAINT_END-DRAW_END));
-    var year=paintTo(Math.pow(w,0.76));
-    if(w>0.72&&!scrubDrawn){scrubDrawn=true;drawScrub(ctx,NSER-1);}
-    if(w>0.80&&!contoursDrawn){contoursDrawn=true;drawContours(ctx);}
-    if(w>0.86&&!namesDrawn){namesDrawn=true;drawNames(ctx,NSER-1);}
-    overlay(year,w>0.5?capNow():'');
-  }
-  if(el>=END){finish();return;}
-  raf=requestAnimationFrame(tick);
-}
-
-function start(){
-  layout();
-  sumCache={};
-  if(REDUCED){finish();return;}
-  t0=0;finished=false;
-  raf=requestAnimationFrame(tick);
-}
-/* Archivo Black changes the height of the text column, and the column decides
-   where the wall begins - so measure after the face has loaded, not before. */
-function boot(){
-  var done=false;
-  function go(){if(done)return;done=true;start();}
-  if(document.fonts&&document.fonts.ready){
-    document.fonts.ready.then(go);
-    setTimeout(go,600);
-  }else go();
-}
-var rt=0;
-window.addEventListener('resize',function(){clearTimeout(rt);
-  rt=setTimeout(function(){var keep=finished?curYi:NSER-1;
-    layout();sumCache={};finished=false;finish();
-    if(keep!==NSER-1){curYi=keep;setYear(keep,true);}},200);});
-
-document.addEventListener('pointerdown',function(e){
-  if(e.target&&e.target.closest&&e.target.closest('a,button'))return;
-  if(!finished){finish();return;}
-  if(!onWall(e))return;
-  downX=e.clientX;downY=e.clientY;
-  /* sobre la regla del siglo se agarra directamente */
-  if(e.clientY>=scrubBox.y-14&&e.clientY<=scrubBox.y+scrubBox.h+6){
-    scrubbing=true;everScrubbed=true;scrubCand=false;
-    body.classList.add('scrubbing');
-    setYear(yearAtX(e.clientX),true);
-  }else{scrubCand=true;}
-});
-document.addEventListener('pointermove',function(e){
-  if(!finished){return;}
-  if(scrubbing){everScrubbed=true;setYear(yearAtX(e.clientX));return;}
-  if(scrubCand&&(e.buttons||e.pointerType==='touch')){
-    if(Math.abs(e.clientX-downX)>8&&Math.abs(e.clientX-downX)>Math.abs(e.clientY-downY)){
-      scrubbing=true;everScrubbed=true;scrubCand=false;
-      body.classList.add('scrubbing');pHas=false;hoverG=null;
-      setYear(yearAtX(e.clientX),true);
-      return;
-    }
+function mapXY(e){var r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+window.__pick=function(x,y){var g=pickCountry(x,y);return g?g.iso:null;};
+function chartX(e){var r=cc.getBoundingClientRect();return e.clientX-r.left;}
+function overControl(e){return !!(e.target&&e.target.closest&&e.target.closest('button,a,input,.legend,.mode,.rot-chart'));}
+var down=null,scrubbing=false;
+stage.addEventListener('pointerdown',function(e){
+  if(overControl(e))return;
+  down={x:e.clientX,y:e.clientY,id:e.pointerId,t:e.pointerType};
+},{passive:true});
+stage.addEventListener('pointermove',function(e){
+  if(scrubbing){setYear(yearAtX(chartX(e)));return;}
+  if(down&&(e.buttons||e.pointerType==='touch')){
+    var dx=e.clientX-down.x,dy=e.clientY-down.y;
+    if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)){
+      scrubbing=true;body.classList.add('scrubbing');if(playing)stopPlay();
+      try{stage.setPointerCapture(down.id);}catch(err){}
+      hoverG=null;showTip(null);setYear(yearAtX(chartX(e)),true);return;}
   }
   if(e.pointerType==='touch')return;
-  onPoint(e);
+  var inMap=e.target===cv||e.target===mapbox||e.target.id==='mapcan';
+  var g=inMap?(function(){var p=mapXY(e);return pickCountry(p[0],p[1]);})():null;
+  if(g!==hoverG){hoverG=g;requestRender();}
+  if(g){var p2=mapXY(e);showTip(g,p2[0],p2[1],false);}
+  else showTip(null);
 },{passive:true});
-document.addEventListener('pointerup',function(e){
-  if(scrubbing){scrubbing=false;scrubCand=false;body.classList.remove('scrubbing');
-    octx.clearRect(0,0,VW,VH);ovDirty=null;overlay(Y0+curYi,capNow());return;}
-  if(scrubCand){scrubCand=false;
-    if(finished&&onWall(e)){pHas=true;pX=e.clientX;pY=e.clientY;hoverG=undefined;schedule();}}
-});
-document.addEventListener('pointercancel',function(){scrubbing=false;scrubCand=false;body.classList.remove('scrubbing');});
-document.addEventListener('pointerleave',function(e){
-  if(e.pointerType==='touch')return;clearHover();});
-window.addEventListener('blur',function(){scrubbing=false;scrubCand=false;body.classList.remove('scrubbing');clearHover();});
+function endPointer(e){
+  if(scrubbing){scrubbing=false;body.classList.remove('scrubbing');try{stage.releasePointerCapture(e.pointerId);}catch(err){}down=null;return;}
+  if(!down){return;}
+  var dx=Math.abs(e.clientX-down.x),dy=Math.abs(e.clientY-down.y),touch=down.t==='touch';down=null;
+  if(dx>8||dy>8)return;
+  /* a tap or click: pin, toggle or release */
+  if(playing)stopPlay();
+  var p=mapXY(e),g=(e.target===cv||e.target===mapbox||e.target.id==='mapcan')?pickCountry(p[0],p[1]):null;
+  if(g&&g.has){
+    if(touch){
+      if(pinned===g){setPinned(null);showTip(null);}
+      else{hoverG=g;setPinned(g);showTip(g,p[0],p[1],true);}
+    }else{
+      if(pinned===g){setPinned(null);}else{setPinned(g);}
+      showTip(g,p[0],p[1],false);
+    }
+  }else{
+    if(pinned)setPinned(null);
+    hoverG=g;showTip(g,p[0],p[1],touch);requestRender();
+  }
+}
+stage.addEventListener('pointerup',endPointer);
+stage.addEventListener('pointercancel',function(e){scrubbing=false;down=null;body.classList.remove('scrubbing');});
+stage.addEventListener('pointerleave',function(e){if(e.pointerType==='touch')return;
+  if(hoverG){hoverG=null;requestRender();}
+  showTip(null);});
+document.addEventListener('pointerdown',function(e){
+  if(COARSE&&!tip.hidden&&!(e.target&&e.target.closest&&e.target.closest('#stage'))){
+    if(!pinned){hoverG=null;showTip(null);requestRender();}}
+},{passive:true});
+window.addEventListener('blur',function(){scrubbing=false;down=null;body.classList.remove('scrubbing');});
+
+/* ---------- keyboard ---------- */
 document.addEventListener('keydown',function(e){
-  if(!finished){if(e.key==='Escape')finish();return;}
-  var k=e.key,step=e.shiftKey?10:1;
-  if(k==='Escape'){
-    if(hoverG){clearHover();return;}
-    if(curYi!==NSER-1){everScrubbed=true;setYear(NSER-1,true);}
-    return;}
-  if(k==='ArrowLeft'){everScrubbed=true;setYear(curYi-step);e.preventDefault();}
-  else if(k==='ArrowRight'){everScrubbed=true;setYear(curYi+step);e.preventDefault();}
-  else if(k==='Home'){everScrubbed=true;setYear(0);e.preventDefault();}
-  else if(k==='End'){everScrubbed=true;setYear(NSER-1);e.preventDefault();}
+  var tg=e.target,tag=tg&&tg.tagName;
+  if(tag==='INPUT'&&e.key!==' '&&e.key!=='Escape')return;
+  var step=e.shiftKey?10:1;
+  if(e.key==='ArrowLeft'){if(playing)stopPlay();setYear(curYi-step);e.preventDefault();}
+  else if(e.key==='ArrowRight'){if(playing)stopPlay();setYear(curYi+step);e.preventDefault();}
+  else if(e.key==='Home'){if(playing)stopPlay();setYear(0);e.preventDefault();}
+  else if(e.key==='End'){if(playing)stopPlay();setYear(NSER-1);e.preventDefault();}
+  else if(e.key===' '&&tag!=='BUTTON'&&tag!=='A'){if(playing)stopPlay();else startPlay(false);e.preventDefault();}
+  else if(e.key==='Escape'){
+    if(intro){stopPlay();setYear(NSER-1,true);return;}
+    if(pinned){setPinned(null);showTip(null);return;}
+    if(hoverG){hoverG=null;showTip(null);requestRender();}
+  }
 });
-window.addEventListener('touchmove',function(e){if(!finished)finish();},{passive:true});
+
+/* ---------- boot ---------- */
+var rt=0;
+window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){layout();requestRender();},150);});
+function start(){
+  updateLegend();updateRot();
+  layout();
+  if(REDUCED){setYear(NSER-1,true);cv.classList.add('on');window.__introDone=true;return;}
+  setYear(0,true);
+  cv.classList.add('on');
+  setTimeout(function(){if(!playing&&!window.__introDone&&curYi===0)startPlay(true);},420);
+}
+function boot(){var done=false;function go(){if(done)return;done=true;start();}
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);setTimeout(go,700);}else go();}
 boot();
 })();
 </script>
