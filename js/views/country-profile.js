@@ -1,9 +1,9 @@
 /* country-profile.js - Country profile with crop history dashboard. */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { COUNTRIES, fmt, fmtUnit, shortItemLabel, smartXTicks } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { COUNTRIES, fmt, fmtUnit, shortItemLabel, smartXTicks } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 let _root = null;
 let _token = 0;
@@ -14,7 +14,7 @@ let _profileProductionMetric = 'tonnes';
 let _profileLaborMetric = 'workers';
 let _profileTradeMetric = 'exports';
 
-const PROFILE_COLORS = ['#6B4226', '#1B3A5C', '#4A6B3A', '#8B2500', '#D4A032', '#5F6F8F', '#9A5D2E', '#2F6F6A'];
+const PROFILE_COLORS = ['#734B2F', '#4F6E86', '#6E7F45', '#93503A', '#CFA95E', '#7A6B8F', '#B8794F', '#3F6E63'];
 const PROFILE_PRODUCTION_METRICS = [
     { id: 'tonnes', label: 't', title: 'Toneladas', key: 'production', unit: 'tonnes' },
     { id: 'energy', label: 'GJ', title: 'Energía', key: 'energy', unit: 'GJ' },
@@ -714,7 +714,7 @@ function renderLineChart(containerId, seriesDefs, opts = {}) {
 }
 
 function layoutEndLabels(defs, y, height, margin) {
-    const gap = 12;
+    const gap = 13;   // 12 dejaba «Maize» pisando «Cassava» con letra de 10 px
     const top = margin.top + 8;
     const bottom = height - margin.bottom - 6;
     const rows = defs

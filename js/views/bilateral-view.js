@@ -1,13 +1,14 @@
 /* bilateral-view.js - World map with bilateral trade flow arcs */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { COUNTRIES, REGIONS, SEQ_COLORS, fmt } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { COUNTRIES, REGIONS, SEQ_COLORS, fmt, ensureNoDataPattern } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 /* -----------------------------------------------
    Module state
    ----------------------------------------------- */
+let _noData = '#EFE6D0';
 let _svg, _g, _gWorld, _gArcs, _gLabels;
 let _projection, _path;
 let _worldTopo = null;
@@ -57,7 +58,7 @@ async function _loadWorld() {
     if (_loadPromise) return _loadPromise;
     _loadPromise = (async () => {
         try {
-            const resp = await fetch('data/world-110m.json?v=20260905c');
+            const resp = await fetch('data/world-110m.json?v=20260908b');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             _worldTopo = await resp.json();
             _worldGeo = topojson.feature(_worldTopo, _worldTopo.objects.countries);
@@ -178,6 +179,7 @@ function _arcScreenPoints(source, target, offset = 0) {
    ----------------------------------------------- */
 export function initBilateralView() {
     _svg = d3.select('#bilateral-svg');
+    _noData = ensureNoDataPattern(_svg, 'latam-nodata-bil');
     _g = _svg.append('g');
     _gWorld = _g.append('g').attr('class', 'bilateral-world');
     _gArcs  = _g.append('g').attr('class', 'bilateral-arcs');
@@ -194,7 +196,7 @@ export function initBilateralView() {
         .attr('orient', 'auto-start-reverse')
         .append('path')
         .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-        .attr('fill', '#C4913E');
+        .attr('fill', '#A9583B');
 
     _zoom = d3.zoom()
         .scaleExtent([0.8, 6])
@@ -417,7 +419,7 @@ export async function updateBilateralView() {
             .range([SEQ_COLORS[1], SEQ_COLORS[SEQ_COLORS.length - 1]])
             .interpolate(d3.interpolateRgb)
             .clamp(true)
-        : () => '#E8E0D4';
+        : () => _noData;
 
     // -- Draw world countries (exclude Antarctica) --
     const features = _worldGeo.features.filter(f => {
@@ -446,17 +448,17 @@ export async function updateBilateralView() {
             // Highlight selected entity countries
             if (_isHighlighted(name)) return 'var(--c-accent)';
             // Other LATAM countries
-            if (_isLatam(name)) return '#D4C9B8';
+            if (_isLatam(name)) return '#E6DCC3';
             // Partner countries: color by value
             const pName = _geoNameToPartner(name, partnerValues);
             if (pName && partnerValues[pName] > 0) return colorScale(partnerValues[pName]);
-            return '#E8E0D4';
+            return _noData;
         })
         .attr('stroke', d => {
             const name = d.properties.name;
-            if (_isHighlighted(name)) return '#8B5E3C';
-            if (_isLatam(name)) return '#C4B8A4';
-            return '#D4C9B8';
+            if (_isHighlighted(name)) return '#734B2F';
+            if (_isLatam(name)) return '#C9BB98';
+            return '#D3C5A4';
         })
         .attr('stroke-width', d => {
             const name = d.properties.name;
@@ -727,7 +729,7 @@ function _drawPartnerLabels(labels) {
                 .attr('text-anchor', label.anchor)
                 .attr('font-size', fontSize)
                 .attr('font-weight', '800')
-                .attr('stroke', '#F5F0E6')
+                .attr('stroke', '#F4EBD6')
                 .attr('stroke-width', halo)
                 .attr('stroke-linejoin', 'round')
                 .text(label.text);
@@ -737,7 +739,7 @@ function _drawPartnerLabels(labels) {
                 .attr('text-anchor', label.anchor)
                 .attr('font-size', fontSize)
                 .attr('font-weight', '800')
-                .attr('fill', '#2D1B0E')
+                .attr('fill', '#231A15')
                 .text(label.text);
             g.transition()
                 .duration(400)

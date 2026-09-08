@@ -1,7 +1,7 @@
 /* data-loader.js - CSV-first data loader with JSON fallback */
 
-import State from './state.js?v=20260906f';
-import { COUNTRIES, REGIONS } from './utils.js?v=20260906f';
+import State from './state.js?v=20260908b';
+import { COUNTRIES, REGIONS } from './utils.js?v=20260908b';
 
 const DataLoader = (() => {
     const DATA_VERSION = '20260905c';

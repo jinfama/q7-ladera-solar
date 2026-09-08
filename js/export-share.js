@@ -8,7 +8,7 @@
  * Kept in its own module so the change is reversible: app.js calls
  * ExportShare.init() once and nothing else in it depends on this file.
  */
-import State from './state.js?v=20260906f';
+import State from './state.js?v=20260908b';
 
 const ExportShare = (() => {
 

@@ -36,60 +36,80 @@ export const REGIONS = {
 };
 
 /* ═══════════════════════════════════════════════
-   Guayasamín color palette
+   Paleta de fresco (2026-09-08, V7): la de la portada index.html.
+   Regla de la casa: la paleta del interior es la de la portada. Las
+   escalas de datos son la MISMA familia que el chrome —cal, ocre,
+   sinopia apagada, sombra— pero no son tokens: son codificaciones
+   de datos y se cambian solo con su leyenda (_legendValueAt).
    ═══════════════════════════════════════════════ */
 
-// Sequential: white → cream → gold → amber → sienna → deep brown (9 steps, wide range)
+// Sequential: cal → ocre → sinopia apagada → sombra (9 steps; L* 93 → 21,
+// cada escalón ≥ 8 L*, así que ocho celdas de leyenda se separan a simple vista)
 export const SEQ_COLORS = [
-    '#FAF6EF', '#F0E4C8', '#E0C880', '#D0A840',
-    '#B88020', '#905A14', '#68380C', '#402008', '#1A0802'
+    '#F4EBD6', '#EBDDB3', '#DEC58A', '#CFA95E',
+    '#BD8A47', '#AA6B3F', '#93503A', '#733B2F', '#4E2C24'
 ];
 
-// Diverging: deep cobalt → cream → blood red
+// Diverging: azul-verde de cal (verdigris) → cal → sinopia apagada
 export const DIV_COLORS = [
-    '#0A1F3A', '#1B3A5C', '#3A6090', '#7A9CBC',
-    '#F2EBE0',
-    '#D4886A', '#B84A30', '#8B2500', '#5A1500'
+    '#2F5A50', '#4F7B6E', '#7FA396', '#B5CBC0',
+    '#EDE2C7',
+    '#D6A98A', '#B8785A', '#93503A', '#6E3A2E'
 ];
 
-// Categorical: vivid Guayasamín — golds, cobalt blues, blood reds, earth greens
+// Categorical: los pigmentos que caben en la cal — ocre, sinopia, azurita,
+// verdigris, sombra, tierra verde, malva de cal — a ≥ 3:1 sobre el papel de cal
 export const CAT_COLORS = [
-    '#D4A032', // golden ochre (Las manos de la protesta)
-    '#8B2500', // blood red (Ternura)
-    '#1B3A5C', // cobalt blue (El grito)
-    '#4A7A3A', // earth green
-    '#D4713A', // burnt orange (Los mutilados)
-    '#5C2D82', // deep violet
-    '#1A6B5A', // teal (Quito colonial)
-    '#B85C20', // copper amber
-    '#2D5A8B', // steel blue
-    '#7A3A2A', // dark sienna
-    '#6B8C32', // olive gold
-    '#A03060', // magenta earth
-    '#3A6A4A', // forest
-    '#6A3A2A', // mahogany
-    '#3A6A8A', // steel blue
-    '#8A7A3A', // olive gold
-    '#A04A5A', // dusty rose
-    '#4A8A5A', // sage
-    '#7A5A2A', // umber
-    '#5A7A8A', // slate
+    '#A67A2E', // ocre tostado (el ocre claro no llega a 3:1 como línea sobre cal)
+    '#93503A', // sinopia apagada
+    '#4F6E86', // azurita
+    '#5E8C82', // verdigris
+    '#4E2C24', // sombra
+    '#B8794F', // ocre tostado
+    '#7A6B8F', // malva de cal
+    '#6E7F45', // tierra verde
+    '#9C6A55', // sinopia clara
+    '#2F5A50', // verdigris oscuro
+    '#A67C52', // siena clara
+    '#8F6B7A', // malva oscura
+    '#7E796C', // gris de cal
+    '#6B4A3A', // sombra tostada
+    '#3E5A78', // azurita oscura
+    '#556B3A', // tierra verde oscura
+    '#B45A4A', // sinopia viva
+    '#7D5A2A', // ocre de sombra
+    '#5A7A8A', // pizarra
+    '#8E5568', // rosa de sombra
 ];
 
-// Treemap category colors (11 crop categories)
+// Treemap category colors (11 crop categories), same family
 export const CATEGORY_COLORS = {
-    'Beverages':        '#8B5E3C',
-    'Cereals':          '#C4913E',
-    'Fibre Crops':      '#5B7A3A',
-    'Fruits':           '#A63D2F',
-    'Legumes':          '#4A7A6A',
-    'Oilseeds':         '#B87333',
-    'Other':            '#A89888',
-    'Roots & Tubers':   '#7A4A6B',
-    'Sugar Crops':      '#2B4570',
-    'Tobacco':          '#6A3A2A',
-    'Vegetables':       '#4A8A5A',
+    'Beverages':        '#6B4A3A',
+    'Cereals':          '#CFA95E',
+    'Fibre Crops':      '#6E7F45',
+    'Fruits':           '#93503A',
+    'Legumes':          '#5E8C82',
+    'Oilseeds':         '#B8794F',
+    'Other':            '#9A968A',
+    'Roots & Tubers':   '#7A6B8F',
+    'Sugar Crops':      '#4F6E86',
+    'Tobacco':          '#4E2C24',
+    'Vegetables':       '#3F6E63',
 };
+
+/* «Sin dato»: la trama de puntos, no un beige plano que se confundía con el
+   centro de la escala divergente. Cada SVG lleva su propio <pattern> porque una
+   referencia a un patrón definido en un SVG oculto no siempre se pinta. */
+export function ensureNoDataPattern(svgSel, id) {
+    if (svgSel.select('#' + id).empty()) {
+        const p = svgSel.insert('defs', ':first-child').append('pattern')
+            .attr('id', id).attr('patternUnits', 'userSpaceOnUse')
+            .attr('width', 6).attr('height', 6);
+        p.append('rect').attr('width', 6).attr('height', 6).attr('fill', '#EFE6D0');
+        p.append('circle').attr('cx', 3).attr('cy', 3).attr('r', 0.9).attr('fill', 'rgba(84,68,58,.55)');
+    }
+    return `url(#${id})`;
+}
 
 /* ═══════════════════════════════════════════════
    Color scale builders

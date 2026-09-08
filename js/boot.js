@@ -11,13 +11,13 @@
    data-loader y solo despues se importe app.
 
    Y la version de la consulta tiene que ser LA MISMA que la que app.js usa en su
-   propio import ('./data-loader.js?v=20260906f'): dos cadenas distintas son dos
+   propio import ('./data-loader.js?v=20260908b'): dos cadenas distintas son dos
    modulos distintos para el navegador, y el DataLoader que app.js mirase estaria
    vacio. Si se sube la version de data-loader.js, hay que subirla en los dos
    sitios a la vez. */
 
-const DATA = './data-loader.js?v=20260906f';
-const APP  = './app.js?v=20260906f';
+const DATA = './data-loader.js?v=20260908b';
+const APP  = './app.js?v=20260908b';
 
 function _quitaPantallaDeCarga() {
     const el = document.getElementById('boot-screen');

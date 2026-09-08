@@ -1,9 +1,9 @@
 /* treemap-view.js - Harvard Atlas-inspired composition treemap */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { COUNTRIES, REGIONS, CATEGORY_COLORS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { COUNTRIES, REGIONS, CATEGORY_COLORS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 let _container, _chartEl;
 let _width = 0, _height = 0;
@@ -256,7 +256,7 @@ export function updateTreemapView() {
                 color: CAT_COLORS[i % CAT_COLORS.length],
             }));
             if (selected.length === 0 && otrosVal > 0) {
-                children.push({ name: 'Otros', value: otrosVal, color: '#C9BDA8' });
+                children.push({ name: 'Otros', value: otrosVal, color: '#B9B09A' });
             }
 
             _renderTreemapFromChildren(children, unit);
@@ -296,8 +296,8 @@ export function updateTreemapView() {
             wrapper.style.width = cellW + 'px';
             wrapper.style.height = cellH + 'px';
             wrapper.style.boxSizing = 'border-box';
-            wrapper.style.borderRight = col < cols - 1 ? '1px solid #E8E0D4' : 'none';
-            wrapper.style.borderBottom = row < rows - 1 ? '1px solid #E8E0D4' : 'none';
+            wrapper.style.borderRight = col < cols - 1 ? '1px solid #E4D7B8' : 'none';
+            wrapper.style.borderBottom = row < rows - 1 ? '1px solid #E4D7B8' : 'none';
 
             // Facet title
             const title = document.createElement('div');
@@ -396,7 +396,7 @@ function _renderTreemap(items, yi, dataField, unit, topN, title, directValues = 
     const topTotal = topItems.reduce((s, v) => s + v.value, 0);
     const otrosVal = grandTotal - topTotal;
     if (otrosVal > 0) {
-        children.push({ name: 'Otros', value: otrosVal, color: '#C9BDA8' });
+        children.push({ name: 'Otros', value: otrosVal, color: '#B9B09A' });
     }
 
     if (children.length === 0) {
@@ -506,7 +506,7 @@ function _renderTreemapInto(container, items, yi, dataField, unit, topN, w, h) {
     const topTotal = topItems.reduce((s, v) => s + v.value, 0);
     const otrosVal = grandTotal - topTotal;
     if (otrosVal > 0) {
-        children.push({ name: 'Otros', value: otrosVal, color: '#C9BDA8' });
+        children.push({ name: 'Otros', value: otrosVal, color: '#B9B09A' });
     }
 
     if (children.length === 0) {

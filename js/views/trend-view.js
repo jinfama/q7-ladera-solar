@@ -1,9 +1,9 @@
 /* trend-view.js - Multi-line time series chart with facet support */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { CAT_COLORS, REGIONS, fmt, fmtUnit, smartXTicks, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { CAT_COLORS, REGIONS, fmt, fmtUnit, smartXTicks, shortItemLabel, shortEntityLabel } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 let _svg, _width, _height;
 const MARGIN = { top: 34, right: 46, bottom: 42, left: 65 };
@@ -336,7 +336,7 @@ function _drawSeriesLabels(g, labels, w, h) {
             .attr('font-size', '11px')
             .attr('font-weight', '600')
             .attr('text-anchor', 'start')
-            .attr('stroke', '#F5F0E6')
+            .attr('stroke', '#F4EBD6')
             .attr('stroke-width', 3)
             .attr('stroke-linejoin', 'round')
             .text(label);
@@ -368,11 +368,11 @@ function _drawYAxisTitle(g, text) {
         .attr('text-anchor', 'start')
         .attr('font-size', '12px')
         .attr('font-weight', '700')
-        .attr('fill', '#7A6A5A')
+        .attr('fill', '#746048')
         .text(_truncateAxisTitle(text));
 }
 
-function _styleXAxisTickLabels(axisG, fontSize = '12px', fill = '#7A6A5A') {
+function _styleXAxisTickLabels(axisG, fontSize = '12px', fill = '#746048') {
     const labels = axisG.selectAll('text')
         .style('font-size', fontSize)
         .style('fill', fill);
@@ -393,7 +393,7 @@ function _drawPlotBounds(g, w, h) {
         .attr('x2', w)
         .attr('y1', d => d)
         .attr('y2', d => d)
-        .attr('stroke', '#C9BDA8')
+        .attr('stroke', '#D3C5A4')
         .attr('stroke-width', 0.75)
         .attr('opacity', 0.72);
 }
@@ -527,7 +527,7 @@ function _attachLineHover(g, seriesList, x, y, w, h, unit, titleForYear) {
     const hoverG = g.append('g').style('display', 'none');
     const hoverLine = hoverG.append('line')
         .attr('y1', 0).attr('y2', h)
-        .attr('stroke', '#1A120B')
+        .attr('stroke', '#231A15')
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '3,2')
         .attr('opacity', 0.5);
@@ -536,7 +536,7 @@ function _attachLineHover(g, seriesList, x, y, w, h, unit, titleForYear) {
         hoverG.append('circle')
             .attr('r', 3.5)
             .attr('fill', s.color)
-            .attr('stroke', '#fff')
+            .attr('stroke', '#FBF7EC')
             .attr('stroke-width', 2)
             .attr('stroke-opacity', 0.85)
             .style('display', 'none')
@@ -590,7 +590,7 @@ function _attachStackedHover(g, seriesList, stacked, dataByYear, x, y, w, h, uni
     const hoverG = g.append('g').style('display', 'none');
     const hoverLine = hoverG.append('line')
         .attr('y1', 0).attr('y2', h)
-        .attr('stroke', '#1A120B')
+        .attr('stroke', '#231A15')
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '3,2')
         .attr('opacity', 0.5);
@@ -599,7 +599,7 @@ function _attachStackedHover(g, seriesList, stacked, dataByYear, x, y, w, h, uni
         hoverG.append('circle')
             .attr('r', 3.5)
             .attr('fill', s.color)
-            .attr('stroke', '#fff')
+            .attr('stroke', '#FBF7EC')
             .attr('stroke-width', 2)
             .attr('stroke-opacity', 0.85)
             .style('display', 'none')
@@ -676,9 +676,9 @@ function _drawMiniLegend(g, series, w, maxRows = 4) {
         .attr('y', -10)
         .attr('width', 92)
         .attr('height', legendH + 10)
-        .attr('fill', '#F5F0E6')
+        .attr('fill', '#F4EBD6')
         .attr('fill-opacity', 0.80)
-        .attr('stroke', '#E3D8C7')
+        .attr('stroke', '#DFD1B2')
         .attr('stroke-width', 0.5);
     rows.forEach((s, i) => {
         const row = legend.append('g').attr('transform', `translate(0, ${i * 12})`);
@@ -691,7 +691,7 @@ function _drawMiniLegend(g, series, w, maxRows = 4) {
             .attr('x', 17)
             .attr('y', 3)
             .attr('font-size', '9px')
-            .attr('fill', '#7A6A5A')
+            .attr('fill', '#746048')
             .text(_truncateFacetLabel(s.name, 13));
     });
     if (series.length > maxRows) {
@@ -699,7 +699,7 @@ function _drawMiniLegend(g, series, w, maxRows = 4) {
             .attr('x', 17)
             .attr('y', rows.length * 12 + 3)
             .attr('font-size', '9px')
-            .attr('fill', '#A89888')
+            .attr('fill', '#9A8B78')
             .text(`+${series.length - maxRows}`);
     }
 }
@@ -844,19 +844,19 @@ function _renderBilateralOverlay() {
     const xAxisG = g.append('g')
         .attr('transform', `translate(0,${h})`)
         .call(d3.axisBottom(x).tickValues(smartXTicks(xDomain, w)).tickFormat(d3.format('d')));
-    _styleXAxisTickLabels(xAxisG, '12px', '#7A6A5A');
+    _styleXAxisTickLabels(xAxisG, '12px', '#746048');
 
     g.append('g')
         .call(d3.axisLeft(y).ticks(6).tickFormat(d => _formatYAxisTick(d, 'toneladas')))
         .selectAll('text')
         .style('font-size', '12px')
-        .style('fill', '#7A6A5A');
+        .style('fill', '#746048');
 
     g.append('g')
         .attr('class', 'grid')
         .call(d3.axisLeft(y).ticks(6).tickSize(-w).tickFormat(''))
         .selectAll('line')
-        .style('stroke', '#E8E0D4')
+        .style('stroke', '#E4D7B8')
         .style('stroke-width', 0.5);
     g.selectAll('.grid .domain').remove();
     _drawPlotBounds(g, w, h);
@@ -915,7 +915,7 @@ function _renderBilateralOverlay() {
                 .attr('cy', y(curPoint.value))
                 .attr('r', 5)
                 .attr('fill', series.color)
-                .attr('stroke', '#fff')
+                .attr('stroke', '#FBF7EC')
                 .attr('stroke-width', 2);
         }
 
@@ -932,7 +932,7 @@ function _renderBilateralOverlay() {
             .attr('x2', x(currentYear))
             .attr('y1', 0)
             .attr('y2', h)
-            .attr('stroke', '#C4913E')
+            .attr('stroke', '#A9583B')
             .attr('stroke-width', 1)
             .attr('stroke-dasharray', '4,3')
             .attr('opacity', 0.6);
@@ -946,7 +946,7 @@ function _renderBilateralOverlay() {
         .attr('y', -4)
         .attr('font-size', '11px')
         .attr('font-weight', '700')
-        .attr('fill', '#7A4A22')
+        .attr('fill', '#734B2F')
         .text(`${flowLabel} - ${shortEntityLabel(entityName)}${productText} - socios`);
 
     _drawYAxisTitle(g, 'Toneladas');
@@ -1128,21 +1128,21 @@ function _renderOverlay() {
     const xAxisG = g.append('g')
         .attr('transform', `translate(0,${h})`)
         .call(d3.axisBottom(x).tickValues(xTicks).tickFormat(d3.format('d')));
-    _styleXAxisTickLabels(xAxisG, '12px', '#7A6A5A');
+    _styleXAxisTickLabels(xAxisG, '12px', '#746048');
 
     // Y axis
     g.append('g')
         .call(d3.axisLeft(y).ticks(6).tickFormat(d => _formatYAxisTick(d, unit)))
         .selectAll('text')
         .style('font-size', '12px')
-        .style('fill', '#7A6A5A');
+        .style('fill', '#746048');
 
     // Grid
     g.append('g')
         .attr('class', 'grid')
         .call(d3.axisLeft(y).ticks(6).tickSize(-w).tickFormat(''))
         .selectAll('line')
-        .style('stroke', '#E8E0D4')
+        .style('stroke', '#E4D7B8')
         .style('stroke-width', 0.5);
     g.selectAll('.grid .domain').remove();
     _drawPlotBounds(g, w, h);
@@ -1224,7 +1224,7 @@ function _renderOverlay() {
                 .attr('cx', d => x(d.year))
                 .attr('cy', d => y(d.value))
                 .attr('r', 3.1)
-                .attr('fill', '#F5F0E6')
+                .attr('fill', '#F4EBD6')
                 .attr('stroke', s.color)
                 .attr('stroke-width', 1.6)
                 .attr('opacity', 0.95);
@@ -1238,7 +1238,7 @@ function _renderOverlay() {
                 .attr('cy', y(curPoint.value))
                 .attr('r', 5)
                 .attr('fill', s.color)
-                .attr('stroke', '#fff')
+                .attr('stroke', '#FBF7EC')
                 .attr('stroke-width', 2);
         }
 
@@ -1264,7 +1264,7 @@ function _renderOverlay() {
             .attr('x2', x(currentYear))
             .attr('y1', 0)
             .attr('y2', h)
-            .attr('stroke', '#C4913E')
+            .attr('stroke', '#A9583B')
             .attr('stroke-width', 1)
             .attr('stroke-dasharray', '4,3')
             .attr('opacity', 0.6);
@@ -1398,7 +1398,7 @@ function _renderFacetByCountry() {
 
         // Panel border
         g.append('rect').attr('width', w).attr('height', h)
-            .attr('fill', 'none').attr('stroke', '#E8E0D4').attr('stroke-width', 0.5);
+            .attr('fill', 'none').attr('stroke', '#E4D7B8').attr('stroke-width', 0.5);
         _attachLineHover(
             g,
             panel.series,
@@ -1538,7 +1538,7 @@ function _renderFacetByProduct() {
 
         // Panel border
         g.append('rect').attr('width', w).attr('height', h)
-            .attr('fill', 'none').attr('stroke', '#E8E0D4').attr('stroke-width', 0.5);
+            .attr('fill', 'none').attr('stroke', '#E4D7B8').attr('stroke-width', 0.5);
         _attachLineHover(
             g,
             panel.series,
@@ -1556,7 +1556,7 @@ function _renderFacetByProduct() {
         .attr('x', _width / 2).attr('y', 13)
         .attr('text-anchor', 'middle')
         .attr('font-size', '11px')
-        .attr('fill', '#7A6A5A')
+        .attr('fill', '#746048')
         .attr('font-weight', '600')
         .text(`${entityName} - ${_getActiveIndicatorLabel()} - Top ${topItems.length} ${_itemPluralName()}`);
 }
@@ -1672,21 +1672,21 @@ function _renderStacked() {
     const xAxisG = g.append('g')
         .attr('transform', `translate(0,${h})`)
         .call(d3.axisBottom(x).tickValues(xTicks).tickFormat(d3.format('d')));
-    _styleXAxisTickLabels(xAxisG, '12px', '#7A6A5A');
+    _styleXAxisTickLabels(xAxisG, '12px', '#746048');
 
     // Y axis
     g.append('g')
         .call(d3.axisLeft(y).ticks(6).tickFormat(d => _formatYAxisTick(d, unit)))
         .selectAll('text')
         .style('font-size', '12px')
-        .style('fill', '#7A6A5A');
+        .style('fill', '#746048');
 
     // Grid
     g.append('g')
         .attr('class', 'grid')
         .call(d3.axisLeft(y).ticks(6).tickSize(-w).tickFormat(''))
         .selectAll('line')
-        .style('stroke', '#E8E0D4')
+        .style('stroke', '#E4D7B8')
         .style('stroke-width', 0.5);
     g.selectAll('.grid .domain').remove();
     _drawPlotBounds(g, w, h);
@@ -1715,7 +1715,7 @@ function _renderStacked() {
         g.append('line')
             .attr('x1', x(currentYear)).attr('x2', x(currentYear))
             .attr('y1', 0).attr('y2', h)
-            .attr('stroke', '#C4913E')
+            .attr('stroke', '#A9583B')
             .attr('stroke-width', 1)
             .attr('stroke-dasharray', '4,3')
             .attr('opacity', 0.6);
@@ -1735,7 +1735,7 @@ function _renderStacked() {
     const hoverG = g.append('g').style('display', 'none');
     const hoverLine = hoverG.append('line')
         .attr('y1', 0).attr('y2', h)
-        .attr('stroke', '#1A120B')
+        .attr('stroke', '#231A15')
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '3,2')
         .attr('opacity', 0.5);
@@ -1745,7 +1745,7 @@ function _renderStacked() {
         hoverG.append('circle')
             .attr('r', 3.5)
             .attr('fill', s.color)
-            .attr('stroke', '#fff')
+            .attr('stroke', '#FBF7EC')
             .attr('stroke-width', 2).attr('stroke-opacity', 0.8)
             .style('display', 'none')
     );
@@ -1923,7 +1923,7 @@ function _renderStackedFacetByCountry() {
 
         // Panel border
         g.append('rect').attr('width', w).attr('height', h)
-            .attr('fill', 'none').attr('stroke', '#E8E0D4').attr('stroke-width', 0.5);
+            .attr('fill', 'none').attr('stroke', '#E4D7B8').attr('stroke-width', 0.5);
 
         _attachStackedHover(
             g,
@@ -2081,7 +2081,7 @@ function _renderStackedFacetByProduct() {
         _drawCurrentYearLine(g, x, h, xDomain);
 
         g.append('rect').attr('width', w).attr('height', h)
-            .attr('fill', 'none').attr('stroke', '#E8E0D4').attr('stroke-width', 0.5);
+            .attr('fill', 'none').attr('stroke', '#E4D7B8').attr('stroke-width', 0.5);
 
         _attachStackedHover(
             g,
@@ -2098,7 +2098,7 @@ function _renderStackedFacetByProduct() {
         .attr('x', _width / 2).attr('y', 13)
         .attr('text-anchor', 'middle')
         .attr('font-size', '11px')
-        .attr('fill', '#7A6A5A')
+        .attr('fill', '#746048')
         .attr('font-weight', '600')
         .text(`${entityName} \u2014 ${_getActiveIndicatorLabel()} \u2014 Top ${topItems.length} ${_itemPluralName()} (apilado)`);
 }
@@ -2139,7 +2139,7 @@ function _drawStackedLegend(g, allSeries, chartWidth) {
             .attr('y', 9)
             .attr('text-anchor', 'end')
             .attr('font-size', '9px')
-            .attr('fill', '#7A6A5A')
+            .attr('fill', '#746048')
             .text(labelText);
     });
 }
@@ -2153,21 +2153,21 @@ function _drawFacetAxes(g, x, y, w, h, xDomain, unit = '') {
     const xAxisG = g.append('g')
         .attr('transform', `translate(0,${h})`)
         .call(d3.axisBottom(x).tickValues(xTicks).tickFormat(d3.format('d')).tickSize(3));
-    _styleXAxisTickLabels(xAxisG, '10px', '#A89888');
+    _styleXAxisTickLabels(xAxisG, '10px', '#9A8B78');
 
     // Y axis (simplified)
     g.append('g')
         .call(d3.axisLeft(y).ticks(4).tickFormat(d => _formatYAxisTick(d, unit)).tickSize(3))
         .selectAll('text')
         .style('font-size', '10px')
-        .style('fill', '#A89888');
+        .style('fill', '#9A8B78');
 
     // Light grid
     g.append('g')
         .attr('class', 'grid')
         .call(d3.axisLeft(y).ticks(4).tickSize(-w).tickFormat(''))
         .selectAll('line')
-        .style('stroke', '#E8E0D4')
+        .style('stroke', '#E4D7B8')
         .style('stroke-width', 0.3);
     g.selectAll('.grid .domain').remove();
     _drawPlotBounds(g, w, h);
@@ -2179,7 +2179,7 @@ function _drawCurrentYearLine(g, x, h, xDomain) {
         g.append('line')
             .attr('x1', x(currentYear)).attr('x2', x(currentYear))
             .attr('y1', 0).attr('y2', h)
-            .attr('stroke', '#C4913E')
+            .attr('stroke', '#A9583B')
             .attr('stroke-width', 0.8)
             .attr('stroke-dasharray', '3,2')
             .attr('opacity', 0.5);

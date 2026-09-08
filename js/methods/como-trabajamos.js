@@ -23,7 +23,7 @@
    puedes reescribir el texto sin miedo a que los números se queden viejos.
 */
 
-import ProvenancePanel from './provenance-panel.js?v=20260906f';
+import ProvenancePanel from './provenance-panel.js?v=20260908b';
 
 const N = (v) => new Intl.NumberFormat('es-ES').format(v);
 const PCT = (v) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }).format(v);

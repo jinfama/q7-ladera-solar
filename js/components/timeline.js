@@ -1,6 +1,6 @@
 /* timeline.js - Year slider with play/pause controls */
 
-import State from '../state.js?v=20260906f';
+import State from '../state.js?v=20260908b';
 
 let _track, _fill, _handleFrom, _handleTo;
 let _trackRect;
@@ -265,7 +265,7 @@ function _toggleSpeedPopup(anchorBtn) {
             padding: 4px 14px;
             border: none;
             background: ${isActive ? 'var(--c-accent, #B5502F)' : 'transparent'};
-            color: ${isActive ? '#fff' : 'var(--c-text, #231A15)'};
+            color: ${isActive ? 'var(--c-on-ink, #F4EBD6)' : 'var(--c-text, #231A15)'};
             font-size: 11px;
             font-weight: ${isActive ? '700' : '500'};
             cursor: pointer;

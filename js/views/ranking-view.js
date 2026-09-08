@@ -1,9 +1,9 @@
 /* ranking-view.js - Horizontal bar chart ranking countries OR items */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { SEQ_COLORS, CAT_COLORS, fmt, fmtUnit } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { SEQ_COLORS, CAT_COLORS, fmt, fmtUnit } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 let _container;
 
@@ -54,7 +54,7 @@ function _renderEntityRanking(year, dataField, unit, topN, geoLevel, selected) {
 
     // Title
     const title = document.createElement('div');
-    title.style.cssText = 'font-size:12px;font-weight:600;color:#7A6A5A;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px';
+    title.style.cssText = 'font-size:12px;font-weight:600;color:#746048;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px';
     const levelLabel = geoLevel === 'subnational'
         ? (selected.length > 0 ? DataLoader.getCountryName(selected[0]) + ' - subnacional' : 'Subnacional')
         : '';
@@ -72,7 +72,7 @@ function _renderEntityRanking(year, dataField, unit, topN, geoLevel, selected) {
 
         row.innerHTML = `
             <span class="ranking-rank">${entry.rank}</span>
-            <span class="ranking-name" style="${isSelected ? 'font-weight:700;color:#C4913E' : ''}">${entry.name}</span>
+            <span class="ranking-name" style="${isSelected ? 'font-weight:700;color:#86493A' : ''}">${entry.name}</span>
             <div class="ranking-bar-track">
                 <div class="ranking-bar-fill" style="width:${pct}%;background:${color}"></div>
                 <span class="ranking-bar-value">${fmtUnit(entry.value, unit)}</span>
@@ -113,7 +113,7 @@ function _renderItemRanking(year, dataField, unit, topN, geoLevel, selected) {
 
         // Title per entity
         const title = document.createElement('div');
-        title.style.cssText = 'font-size:12px;font-weight:600;color:#7A6A5A;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px';
+        title.style.cssText = 'font-size:12px;font-weight:600;color:#746048;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px';
         if (effectiveCodes.length > 1 && cIdx > 0) title.style.marginTop = '16px';
         const entityName = DataLoader.getCountryName(code);
         title.textContent = `${entityName} - ${_getActiveIndicatorLabel()} - ${year}`;

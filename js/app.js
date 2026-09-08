@@ -1,18 +1,18 @@
 /* app.js - Main application controller for Atlas Agrario de América Latina */
 
-import State from './state.js?v=20260906f';
-import DataLoader from './data-loader.js?v=20260906f';
-import { COUNTRIES, REGIONS, CATEGORY_ICONS, VIEWS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from './utils.js?v=20260906f';
-import { initMapView, updateMapView } from './views/map-view.js?v=20260906f';
-import { initTrendView, updateTrendView } from './views/trend-view.js?v=20260906f';
-import { initTreemapView, updateTreemapView } from './views/treemap-view.js?v=20260906f';
-import { initRankingView, updateRankingView } from './views/ranking-view.js?v=20260906f';
-import { initTableView, updateTableView } from './views/table-view.js?v=20260906f';
-import { initBilateralView, updateBilateralView } from './views/bilateral-view.js?v=20260906f';
-import { initCountryProfileView, updateCountryProfileView } from './views/country-profile.js?v=20260906f';
-import { initTimeline, updateTimeline } from './components/timeline.js?v=20260906f';
-import { initTooltip, showTooltip, hideTooltip } from './components/tooltip.js?v=20260906f';
-import ExportShare from './export-share.js?v=20260906f';
+import State from './state.js?v=20260908b';
+import DataLoader from './data-loader.js?v=20260908b';
+import { COUNTRIES, REGIONS, CATEGORY_ICONS, VIEWS, CAT_COLORS, fmt, fmtUnit, shortItemLabel, shortEntityLabel } from './utils.js?v=20260908b';
+import { initMapView, updateMapView } from './views/map-view.js?v=20260908b';
+import { initTrendView, updateTrendView } from './views/trend-view.js?v=20260908b';
+import { initTreemapView, updateTreemapView } from './views/treemap-view.js?v=20260908b';
+import { initRankingView, updateRankingView } from './views/ranking-view.js?v=20260908b';
+import { initTableView, updateTableView } from './views/table-view.js?v=20260908b';
+import { initBilateralView, updateBilateralView } from './views/bilateral-view.js?v=20260908b';
+import { initCountryProfileView, updateCountryProfileView } from './views/country-profile.js?v=20260908b';
+import { initTimeline, updateTimeline } from './components/timeline.js?v=20260908b';
+import { initTooltip, showTooltip, hideTooltip } from './components/tooltip.js?v=20260908b';
+import ExportShare from './export-share.js?v=20260908b';
 
 /* The URL the reader arrived with, captured before anything can rewrite it. */
 const _initialHash = location.hash;
@@ -1215,7 +1215,7 @@ let _metodosLoading = null;
 function _ensureComoTrabajamos() {
     const host = document.getElementById('metodos-host');
     if (!host || _metodosLoading) return;
-    _metodosLoading = import('./methods/como-trabajamos.js?v=20260906f')
+    _metodosLoading = import('./methods/como-trabajamos.js?v=20260908b')
         .then(mod => mod.default.render(host))
         .catch(err => {
             _metodosLoading = null;

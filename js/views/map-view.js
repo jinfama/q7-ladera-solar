@@ -1,9 +1,9 @@
 /* map-view.js - Choropleth map of Latin America */
 
-import State from '../state.js?v=20260906f';
-import DataLoader from '../data-loader.js?v=20260906f';
-import { SEQ_COLORS, fmtUnit, COUNTRIES, REGIONS } from '../utils.js?v=20260906f';
-import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260906f';
+import State from '../state.js?v=20260908b';
+import DataLoader from '../data-loader.js?v=20260908b';
+import { SEQ_COLORS, fmtUnit, COUNTRIES, REGIONS, ensureNoDataPattern } from '../utils.js?v=20260908b';
+import { showTooltip, hideTooltip } from '../components/tooltip.js?v=20260908b';
 
 let _svg, _g, _projection, _path, _colorFn;
 let _svg1, _g1, _svg2, _g2, _zoom, _yearOverride, _yearLabelId = 'map-year';
@@ -32,9 +32,11 @@ function _hideMapLoading() {
 
 export function initMapView() {
     _svg1 = d3.select('#map-svg');
+    _noData1 = ensureNoDataPattern(_svg1, 'latam-nodata-a');
     _g1 = _svg1.append('g');
     
     _svg2 = d3.select('#map-svg-2');
+    _noData2 = ensureNoDataPattern(_svg2, 'latam-nodata-b');
     _g2 = _svg2.append('g');
 
     _zoom = d3.zoom()
@@ -104,6 +106,13 @@ function _resetZoomTransform() {
     _resettingZoom = false;
 }
 
+
+/* Sin dato: trama de puntos del SVG que se esté pintando; el borde, cal sombreada. */
+let _noData1 = '#EFE6D0', _noData2 = '#EFE6D0';
+const NO_DATA_STROKE = '#D3C5A4';
+const BG_FILL = '#E6DCC3';    // países fuera del atlas: cal desvaída
+const BG_STROKE = '#D3C5A4';
+function _noData() { return _g === _g2 ? _noData2 : _noData1; }
 
 export function updateMapView() {
     if (State.get('activeView') !== 'map') return;
@@ -225,18 +234,18 @@ function _renderCountryLevel() {
         .attr('class', 'country-path')
         .attr('d', _path)
         .attr('fill', d => {
-            if (d.properties._background) return '#DDD4C4'; // gray for non-LATAM countries
+            if (d.properties._background) return BG_FILL; // gray for non-LATAM countries
             const val = d.properties._value;
-            if (val == null) return '#E8E0D4';
+            if (val == null) return _noData();
             if (_hasDiverging) return _colorFn(val);
-            return val > 0 ? _colorFn(val) : '#E8E0D4';
+            return val > 0 ? _colorFn(val) : _noData();
         })
         .attr('stroke', d => {
-            if (d.properties._background) return '#C9BDA8';
+            if (d.properties._background) return BG_STROKE;
             const val = d.properties._value;
-            if (val == null) return '#E8E0D4';
+            if (val == null) return NO_DATA_STROKE;
             if (_hasDiverging) return _colorFn(val);
-            return val > 0 ? _colorFn(val) : '#E8E0D4';
+            return val > 0 ? _colorFn(val) : NO_DATA_STROKE;
         })
         .attr('stroke-width', 1.5)
         .attr('stroke-linejoin', 'round')
@@ -341,7 +350,7 @@ function _renderLatamLevel() {
     const bgFeatures = geo.features.filter(f => f.properties._background);
 
     // Color: use a single warm tone for the aggregate
-    const fillColor = val != null && val > 0 ? '#D0A840' : '#E8E0D4';
+    const fillColor = val != null && val > 0 ? '#CFA95E' : _noData();
 
     // Clear previous elements
     _g.selectAll('.country-path').remove();
@@ -358,8 +367,8 @@ function _renderLatamLevel() {
         .append('path')
         .attr('class', 'country-path')
         .attr('d', _path)
-        .attr('fill', '#DDD4C4')
-        .attr('stroke', '#C9BDA8')
+        .attr('fill', BG_FILL)
+        .attr('stroke', BG_STROKE)
         .attr('stroke-width', 1.5)
         .attr('stroke-linejoin', 'round')
         .style('cursor', 'default');
@@ -487,8 +496,8 @@ function _renderRegionLevel() {
         .append('path')
         .attr('class', 'country-path')
         .attr('d', _path)
-        .attr('fill', '#DDD4C4')
-        .attr('stroke', '#C9BDA8')
+        .attr('fill', BG_FILL)
+        .attr('stroke', BG_STROKE)
         .attr('stroke-width', 1.5)
         .attr('stroke-linejoin', 'round')
         .style('cursor', 'default');
@@ -502,15 +511,15 @@ function _renderRegionLevel() {
         .attr('d', _path)
         .attr('fill', d => {
             const val = d.properties._value;
-            if (val == null) return '#E8E0D4';
+            if (val == null) return _noData();
             if (_hasDiverging) return _colorFn(val);
-            return val > 0 ? _colorFn(val) : '#E8E0D4';
+            return val > 0 ? _colorFn(val) : _noData();
         })
         .attr('stroke', d => {
             const val = d.properties._value;
-            if (val == null) return '#E8E0D4';
+            if (val == null) return NO_DATA_STROKE;
             if (_hasDiverging) return _colorFn(val);
-            return val > 0 ? _colorFn(val) : '#E8E0D4';
+            return val > 0 ? _colorFn(val) : NO_DATA_STROKE;
         })
         .attr('stroke-width', 1.5)
         .attr('stroke-linejoin', 'round')
@@ -731,9 +740,9 @@ function _renderSubnational() {
             .attr('d', _path)
             .attr('fill', d => {
                 const val = d.properties._value;
-                if (val == null) return '#E8E0D4';
+                if (val == null) return _noData();
                 if (_hasDivergingSub) return _colorFn(val);
-                return val > 0 ? _colorFn(val) : '#E8E0D4';
+                return val > 0 ? _colorFn(val) : _noData();
             })
             // Thin neutral stroke (not fill-coloured) so dark-coloured
             // countries don't get a half-pixel halo on coastlines, while
@@ -767,9 +776,9 @@ function _renderSubnational() {
             .attr('d', _path)
             .attr('fill', d => {
                 const val = d.properties._value;
-                if (val == null) return '#E8E0D4';
+                if (val == null) return _noData();
                 if (_hasDivergingSub) return _colorFn(val);
-                return val > 0 ? _colorFn(val) : '#E8E0D4';
+                return val > 0 ? _colorFn(val) : _noData();
             })
             // Borders are drawn separately by admin1-border-mesh and
             // admin1-outline-mesh below. Painting a 1.5px stroke in the fill
@@ -844,8 +853,8 @@ function _renderSubnational() {
     _updateLegend(values);
 }
 
-// Diverging palette: blood red (deficit) ? beige neutral ? forest green (surplus)
-const DIV_COLORS = ['#8B2500', '#C4613E', '#E8E0D4', '#6B8E6B', '#2D5A2D'];
+// Diverging palette: sinopia apagada (déficit) → cal (0) → verdigris, azul-verde de cal (superávit)
+const DIV_COLORS = ['#8A4636', '#C89A82', '#EDE2C7', '#8FB0A4', '#3F6E63'];
 
 function _buildColorScale(values, scaleType, domain = null) {
     if (values.length === 0) return () => SEQ_COLORS[0];
@@ -1031,7 +1040,11 @@ function _updateLegend(values) {
     const every = window.innerWidth < 720 ? Math.max(2, Math.ceil(N / 2)) : 2;
     for (let i = 0; i <= N; i++) {
         const v = at(i / N);
-        const show = (i % every === 0) || i === N;
+        // En la escala divergente se rotulan los extremos y las dos fronteras de la
+        // clase neutra (±), que es lo que hay que poder leer; en la secuencial, una de cada dos.
+        const show = isDiverging
+            ? (i === 0 || i === N || i === Math.floor(N / 2) || i === Math.ceil(N / 2))
+            : ((i % every === 0) || i === N);
         const pos = (i / N) * 100;
         const edge = i === 0 ? ' at-start' : (i === N ? ' at-end' : '');
         ticks.push(`<span class="map-legend-tick${edge}" style="left:${pos}%">` +
@@ -1046,6 +1059,23 @@ function _updateLegend(values) {
             <span class="map-legend-nodata"><i></i>Sin dato</span>
         </div>
     `;
+    _thinLegendLabels(legend);
+}
+
+/* Dos etiquetas de la barra pueden pisarse («252.7 M t1097.0 M t» en Comercio):
+   tras pintar, la que invade a su vecina se calla, y si la que choca es la del
+   extremo derecho, calla la anterior, porque el rango se lee por sus extremos. */
+function _thinLegendLabels(legend) {
+    const ticks = Array.from(legend.querySelectorAll('.map-legend-tick')).filter(t => t.textContent);
+    let prev = null;
+    for (const t of ticks) {
+        if (!prev) { prev = t; continue; }
+        const a = prev.getBoundingClientRect(), b = t.getBoundingClientRect();
+        if (b.left < a.right + 6) {
+            if (t.classList.contains('at-end')) { prev.textContent = ''; prev = t; }
+            else { t.textContent = ''; }
+        } else prev = t;
+    }
 }
 
 /* Inverse of the transform _buildColorScale applies, so that a position on the
